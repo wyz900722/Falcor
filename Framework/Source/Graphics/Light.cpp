@@ -428,15 +428,7 @@ namespace Falcor
             const Material::SharedPtr& pMaterial = pMesh->getMaterial();
             if (pMaterial)
             {
-                for (uint32_t layerId = 0; layerId < pMaterial->getNumLayers(); ++layerId)
-                {
-                    const Material::Layer l = pMaterial->getLayer(layerId);
-                    if (l.type == Material::Layer::Type::Emissive)
-                    {
-                        mData.intensity = vec3(l.albedo);
-                        break;
-                    }
-                }
+                mData.intensity = pMaterial->getSEmissiveColor();
             }
         }
     }
@@ -551,21 +543,13 @@ namespace Falcor
             // Obtain mesh instances for this mesh
             for (uint32_t instanceId = 0; instanceId < pModel->getMeshInstanceCount(meshId); ++instanceId)
             {
-                // Check if this mesh has a material
+                // Check if this mesh has an emissive material
                 const Material::SharedPtr& pMaterial = pMesh->getMaterial();
                 if (pMaterial)
                 {
-                    // Check for emissive layers
-                    const uint32_t numLayers = pMaterial->getNumLayers();
-                    for (uint32_t layerId = 0; layerId < numLayers; ++layerId)
+                    if (luminance(pMaterial->getSEmissiveColor()))
                     {
-                        const Material::Layer l = pMaterial->getLayer(layerId);
-                        if (l.type == Material::Layer::Type::Emissive)
-                        {
-                            // Create an area light for an emissive material
-                            areaLights.push_back(createAreaLight(pModel->getMeshInstance(meshId, instanceId)));
-                            break;
-                        }
+                        areaLights.push_back(createAreaLight(pModel->getMeshInstance(meshId, instanceId)));
                     }
                 }
             }

@@ -209,7 +209,7 @@ namespace Falcor
 
         /** Set the height scale and offset
         */
-        void setHeightScaleOffset(float scale, float offset);
+        void setHeightScaleOffset(float scale, float offset) { mData.heightScaleOffset = vec2(scale, offset); }
 
         /** Get the height scale
         */
@@ -230,6 +230,22 @@ namespace Falcor
         /** Comparison operator
         */
         bool operator==(const Material& other) const;
+
+        /** Bind a sampler to the material
+        */
+        void setSampler(Sampler::SharedPtr pSampler) { mData.samplerState = pSampler; }
+
+        /** Get the sampler attached to the material
+        */
+        Sampler::SharedPtr getSampler() const { return mData.samplerState; }
+
+        /** Bind the material to a program variables object
+        */
+        void setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, const char* varName) const;
+
+        /** Bind the material to a program variables object
+        */
+        void setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, uint32_t offset) const;
     private:
         void updateDiffuseType();
         void updateSpecularType();

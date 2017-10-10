@@ -125,16 +125,6 @@ namespace Falcor
     {
         UniquePtr pLeanMaps = UniquePtr(new LeanMap);
 
-        // Initialize scene materials
-        for(uint32_t i = 0; i < pScene->getMaterialCount(); i++)
-        {
-            const Material* pMaterial = pScene->getMaterial(i).get();
-            if(pLeanMaps->createLeanMap(pMaterial) == false)
-            {
-                return nullptr;
-            }
-        }
-
         // Initialize model materials
         for(uint32_t model = 0; model < pScene->getModelCount(); model++)
         {

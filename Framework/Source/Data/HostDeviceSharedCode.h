@@ -237,6 +237,7 @@ struct MaterialData
     vec2 pad                DEFAULTS(vec2(0));
 
     MaterialTextures textures;
+    SamplerState samplerState;
 };
 
 /*******************************************************************

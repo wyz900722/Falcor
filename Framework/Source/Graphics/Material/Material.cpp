@@ -187,4 +187,14 @@ namespace Falcor
 #undef compare_texture
         return true;
     }
+
+    void Material::setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, uint32_t offset) const
+    {
+
+    }
+
+    void Material::setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, const char* varName) const
+    {
+
+    }
 }

@@ -381,9 +381,6 @@
     <ClCompile Include="Utils\DebugDrawer.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Material\MaterialHistory.cpp">
-      <Filter>Graphics\Material</Filter>
-    </ClCompile>
     <ClCompile Include="Effects\AmbientOcclusion\SSAO.cpp">
       <Filter>Effects\AmbientOcclusion</Filter>
     </ClCompile>
@@ -1561,9 +1558,6 @@
     </ClInclude>
     <ClInclude Include="Utils\DebugDrawer.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Material\MaterialHistory.h">
-      <Filter>Graphics\Material</Filter>
     </ClInclude>
     <ClInclude Include="Effects\AmbientOcclusion\SSAO.h">
       <Filter>Effects\AmbientOcclusion</Filter>

@@ -82,9 +82,6 @@
     <ClCompile Include="Graphics\Material\Material.cpp">
       <Filter>Graphics\Material</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\Material\MaterialEditor.cpp">
-      <Filter>Graphics\Material</Filter>
-    </ClCompile>
     <ClCompile Include="Utils\Video\VideoDecoder.cpp">
       <Filter>Utils\Video</Filter>
     </ClCompile>
@@ -129,9 +126,6 @@
     </ClCompile>
     <ClCompile Include="Utils\MonitorInfo.cpp">
       <Filter>Utils</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\Material\BasicMaterial.cpp">
-      <Filter>Graphics\Material</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\Material\MaterialSystem.cpp">
       <Filter>Graphics\Material</Filter>
@@ -660,9 +654,6 @@
     <ClInclude Include="Graphics\Material\Material.h">
       <Filter>Graphics\Material</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\Material\MaterialEditor.h">
-      <Filter>Graphics\Material</Filter>
-    </ClInclude>
     <ClInclude Include="Utils\Video\VideoDecoder.h">
       <Filter>Utils\Video</Filter>
     </ClInclude>
@@ -707,9 +698,6 @@
     </ClInclude>
     <ClInclude Include="Utils\MonitorInfo.h">
       <Filter>Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Material\BasicMaterial.h">
-      <Filter>Graphics\Material</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Material\MaterialSystem.h">
       <Filter>Graphics\Material</Filter>

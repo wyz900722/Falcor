@@ -101,139 +101,138 @@ This is a general host/device structure that describe a camera.
 */
 struct CameraData
 {
-    float4x4            viewMat                DEFAULTS(float4x4());                ///< Camera view matrix.
-    float4x4            projMat                DEFAULTS(float4x4());                ///< Camera projection matrix.
-    float4x4            viewProjMat            DEFAULTS(float4x4());                ///< Camera view-projection matrix.
-    float4x4            invViewProj            DEFAULTS(float4x4());                ///< Camera inverse view-projection matrix.
-    float4x4            prevViewProjMat        DEFAULTS(float4x4());                ///< Camera view-projection matrix associated to previous frame.
+    float4x4 viewMat                DEFAULTS(float4x4());       ///< Camera view matrix.
+    float4x4 projMat                DEFAULTS(float4x4());       ///< Camera projection matrix.
+    float4x4 viewProjMat            DEFAULTS(float4x4());       ///< Camera view-projection matrix.
+    float4x4 invViewProj            DEFAULTS(float4x4());       ///< Camera inverse view-projection matrix.
+    float4x4 prevViewProjMat        DEFAULTS(float4x4());       ///< Camera view-projection matrix associated to previous frame.
 
-    float3            position               DEFAULTS(float3(0, 0, 0));         ///< Camera world-space position.
-    float           focalLength            DEFAULTS(21.0f);                 ///< Camera focal length in mm. Default is 59 degree vertical, 90 horizontal FOV at 16:9 aspect ratio.
-    float3            up                     DEFAULTS(float3(0, 1, 0));         ///< Camera world-space up vector.
-    float           aspectRatio            DEFAULTS(1.f);                   ///< Camera aspect ratio.
-    float3            target                 DEFAULTS(float3(0, 0, -1));        ///< Camera target point in world-space.
-    float           nearZ                  DEFAULTS(0.1f);                  ///< Camera near plane.
-    float3            cameraU                DEFAULTS(float3(0, 0, 1));         ///< Camera base vector U. normalized it indicates the left image plane vector. The length is dependent on the FOV. 
-    float           farZ                   DEFAULTS(10000.0f);              ///< Camera far plane.
-    float3            cameraV                DEFAULTS(float3(0, 1, 0));         ///< Camera base vector V. normalized it indicates the up image plane vector. The length is dependent on the FOV. 
-    float           jitterX                DEFAULTS(0.0f);                  ///< Eventual camera jitter in the x coordinate
-    float3            cameraW                DEFAULTS(float3(1, 0, 0));         ///< Camera base vector U. normalized it indicates the forward direction. The length is the camera focal distance.
-    float           jitterY                DEFAULTS(0.0f);                  ///< Eventual camera jitter in the y coordinate
+    float3   position               DEFAULTS(float3(0, 0, 0));  ///< Camera world-space position.
+    float    focalLength            DEFAULTS(21.0f);            ///< Camera focal length in mm. Default is 59 degree vertical, 90 horizontal FOV at 16:9 aspect ratio.
+    float3   up                     DEFAULTS(float3(0, 1, 0));  ///< Camera world-space up vector.
+    float    aspectRatio            DEFAULTS(1.f);              ///< Camera aspect ratio.
+    float3   target                 DEFAULTS(float3(0, 0, -1)); ///< Camera target point in world-space.
+    float    nearZ                  DEFAULTS(0.1f);             ///< Camera near plane.
+    float3   cameraU                DEFAULTS(float3(0, 0, 1));  ///< Camera base vector U. normalized it indicates the left image plane vector. The length is dependent on the FOV. 
+    float    farZ                   DEFAULTS(10000.0f);         ///< Camera far plane.
+    float3   cameraV                DEFAULTS(float3(0, 1, 0));  ///< Camera base vector V. normalized it indicates the up image plane vector. The length is dependent on the FOV. 
+    float    jitterX                DEFAULTS(0.0f);             ///< Eventual camera jitter in the x coordinate
+    float3   cameraW                DEFAULTS(float3(1, 0, 0));  ///< Camera base vector U. normalized it indicates the forward direction. The length is the camera focal distance.
+    float    jitterY                DEFAULTS(0.0f);             ///< Eventual camera jitter in the y coordinate
 
-    float4x4            rightEyeViewMat;
-    float4x4            rightEyeProjMat;
-    float4x4            rightEyeViewProjMat;
-    float4x4            rightEyePrevViewProjMat;
+    float4x4 rightEyeViewMat;
+    float4x4 rightEyeProjMat;
+    float4x4 rightEyeViewProjMat;
+    float4x4 rightEyePrevViewProjMat;
 };
 
 /*******************************************************************
                     Material
 *******************************************************************/
+// Shading model
+#define ShadingModelSpecGloss 0
 
-/**
-    A description for a single material layer.
-    Contains information about underlying BRDF, NDF, and rules for blending with other layers.
-    Also contains material properties, such as albedo and roughness.
-*/
-struct MaterialLayerDesc
-{
-    uint32_t    type            DEFAULTS(MatNone);             ///< Specifies a material Type: diffuse/conductor/dielectric/etc. None means there is no material
-    uint32_t    ndf             DEFAULTS(NDFGGX);              ///< Specifies a model for normal distribution function (NDF): Beckmann, GGX, etc.
-    uint32_t    blending        DEFAULTS(BlendAdd);            ///< Specifies how this layer should be combined with previous layers. E.g., blended based on Fresnel (useful for dielectric coatings), or just added on top, etc.
-    uint32_t    hasTexture      DEFAULTS(0);                   ///< Specifies whether or not the material has textures. For dielectric and conductor layers this has special meaning - if the 2nd bit is on, it means we have roughness channel
-};
+// Channel type
+#define ChannelTypeUnused    0
+#define ChannelTypeConst     1
+#define ChannelTypeTexture   2
 
-struct MaterialLayerValues
-{
-    float4     albedo;                                       ///< Material albedo/specular color/emitted color
-    float4     roughness;                                    ///< Material roughness parameter [0;1] for NDF
-    float4     extraParam;                                   ///< Additional user parameter, can be IoR for conductor and dielectric
-    float3     pad             DEFAULTS(float3(0, 0, 0));
-    float    pmf             DEFAULTS(0.f);                 ///< Specifies the current value of the PMF of all layers. E.g., first layer just contains a probability of being selected, others accumulate further
-};
+// Normal map type
+#define NormalMapUnused     0
+#define NormalMapRGB        1
+#define NormalMapRG         2
 
-/**
-    The auxiliary structure that provides the first occurrence of the layer by its type.
-*/
-struct LayerIdxByType
-{
-    float3 pad;               // This is here due to HLSL alignment rules
-    int32_t id DEFAULTS(-1);
-};
+// Alpha mode
+#define AlphaModeOpaque      0
+#define AlphaModeTransparent 1
+#define AlphaModeMask        2
 
-/**
-    The main material description structure. Contains a dense list of layers. The layers are stored from inner to outer, ending with a MatNone layer.
-    Besides, the material contains its scene-unique id, as well as various modifiers, like normal/displacement map and alpha test map.
-*/
-struct MaterialDesc
-{
-    MaterialLayerDesc   layers[MatMaxLayers];     // First one is a terminal layer, usually either opaque with coating, or dielectric; others are optional layers, usually a transparent dielectric coating layer or a mixture with conductor
-    uint32_t            hasAlphaMap     DEFAULTS(0);
-    uint32_t            hasNormalMap    DEFAULTS(0);
-    uint32_t            hasHeightMap    DEFAULTS(0);
-    uint32_t            hasAmbientMap   DEFAULTS(0);
-    LayerIdxByType      layerIdByType[MatNumTypes];             ///< Provides a layer idx by its type, if there is no layer of this type, the idx is -1
-};
+// NDF type
+#define NdfGGX      0
+#define NdfBeckmann 1
 
-struct MaterialValues
-{
-    MaterialLayerValues layers[MatMaxLayers];
-    float2  height;                        // Height (displacement) map modifier (scale, offset). If texture is non-null, one can apply a displacement or parallax mapping
-    float alphaThreshold DEFAULTS(1.0f); // Alpha test threshold, in cast alpha-test is enabled (alphaMap is not nullptr)
-    int32_t id           DEFAULTS(-1);   // Scene-unique material id, -1 is a wrong material
-};
+// Bit count
+#define SHADING_MODEL_BITS   (3)
+#define DIFFUSE_TYPE_BITS    (3)
+#define SPECULAR_TYPE_BITS   (3)
+#define EMISSIVE_TYPE_BITS   (3)
+#define NORMAL_MAP_BITS      (2)
+#define OCCLUSION_MAP_BITS   (1)
+#define REFLECTION_MAP_BITS  (1)
+#define LIGHT_MAP_BITS       (1)
+#define HEIGHT_MAP_BITS      (1)
+#define ALPHA_MODE_BITS      (2)
+#define DOUBLE_SIDED_BITS    (1)
+#define NDF_BITS             (3)
+
+// Offsets
+#define SHADING_MODEL_OFFSET (0)
+#define DIFFUSE_TYPE_OFFSET  (SHADING_MODEL_OFFSET + SHADING_MODEL_BITS)
+#define SPECULAR_TYPE_OFFSET (DIFFUSE_TYPE_OFFSET  + DIFFUSE_TYPE_BITS)
+#define EMISSIVE_TYPE_OFFSET (SPECULAR_TYPE_OFFSET + SPECULAR_TYPE_BITS)
+#define NORMAL_MAP_OFFSET    (EMISSIVE_TYPE_OFFSET + EMISSIVE_TYPE_BITS)
+#define OCCLUSION_MAP_OFFSET (NORMAL_MAP_OFFSET    + NORMAL_MAP_BITS)
+#define REFLECTION_MAP_OFFSET (OCCLUSION_MAP_OFFSET+ OCCLUSION_MAP_BITS)
+#define LIGHT_MAP_OFFSET     (REFLECTION_MAP_OFFSET+ REFLECTION_MAP_BITS)
+#define HEIGHT_MAP_OFFSET    (LIGHT_MAP_OFFSET     + LIGHT_MAP_BITS)
+#define ALPHA_MODE_OFFSET    (HEIGHT_MAP_OFFSET    + HEIGHT_MAP_BITS)
+#define DOUBLE_SIDED_OFFSET  (ALPHA_MODE_OFFSET    + ALPHA_MODE_BITS)
+#define NDF_OFFSET           (DOUBLE_SIDED_OFFSET  + DOUBLE_SIDED_BITS)
+
+// Extract bits
+#define EXTRACT_BITS(bits, offset, value) ((value >> offset) & ((1 << bits) - 1))
+#define EXTRACT_SHADING_MODEL(value)    EXTRACT_BITS(SHADING_MODEL_BITS,    SHADING_MODEL_OFFSET,   value)
+#define EXTRACT_DIFFUSE_TYPE(value)     EXTRACT_BITS(DIFFUSE_TYPE_BITS,     DIFFUSE_TYPE_OFFSET,    value)
+#define EXTRACT_SPECULAR_TYPE(value)    EXTRACT_BITS(SPECULAR_TYPE_BITS,    SPECULAR_TYPE_OFFSET,   value)
+#define EXTRACT_EMISSIVE_TYPE(value)    EXTRACT_BITS(EMISSIVE_TYPE_BITS,    EMISSIVE_TYPE_OFFSET,   value)
+#define EXTRACT_NORMAL_MAP_TYPE(value)  EXTRACT_BITS(NORMAL_MAP_BITS,       NORMAL_MAP_OFFSET,      value)
+#define EXTRACT_OCCLUSION_MAP(value)    EXTRACT_BITS(OCCLUSION_MAP_BITS,    OCCLUSION_MAP_OFFSET,   value)
+#define EXTRACT_REFLECTION_MAP (value)  EXTRACT_BITS(REFLECTION_MAP_BITS,   REFLECTION_MAP_OFFSET,  value)
+#define EXTRACT_LIGHT_MAP(value)        EXTRACT_BITS(LIGHT_MAP_BITS,        LIGHT_MAP_OFFSET,       value)  
+#define EXTRACT_HEIGHT_MAP(value)       EXTRACT_BITS(HEIGHT_MAP_BITS,       HEIGHT_MAP_OFFSET,      value)
+#define EXTRACT_ALPHA_MODE(value)       EXTRACT_BITS(ALPHA_MODE_BITS,       ALPHA_MODE_OFFSET,      value)
+#define EXTRACT_DOUBLE_SIDED(value)     EXTRACT_BITS(DOUBLE_SIDED_BITS,     DOUBLE_SIDED_OFFSET,    value)
+#define EXTRACT_NDF_TYPE(value)         EXTRACT_BITS(NDF_BITS,              NDF_OFFSET,             value)
+
+// Pack bits
+#define PACK_BITS(bits, offset, flags, value) (((value & ((1 << bits) - 1)) << offset) | (flags & (~(((1 << bits) - 1) << offset))))
+#define PACK_SHADING_MODEL(flags, value)    PACK_BITS(SHADING_MODEL_BITS,    SHADING_MODEL_OFFSET,   flags, value)
+#define PACK_DIFFUSE_TYPE(flags, value)     PACK_BITS(DIFFUSE_TYPE_BITS,     DIFFUSE_TYPE_OFFSET,    flags, value)
+#define PACK_SPECULAR_TYPE(flags, value)    PACK_BITS(SPECULAR_TYPE_BITS,    SPECULAR_TYPE_OFFSET,   flags, value)
+#define PACK_EMISSIVE_TYPE(flags, value)    PACK_BITS(EMISSIVE_TYPE_BITS,    EMISSIVE_TYPE_OFFSET,   flags, value)
+#define PACK_NORMAL_MAP_TYPE(flags, value)  PACK_BITS(NORMAL_MAP_BITS,       NORMAL_MAP_OFFSET,      flags, value)
+#define PACK_OCCLUSION_MAP(flags, value)    PACK_BITS(OCCLUSION_MAP_BITS,    OCCLUSION_MAP_OFFSET,   flags, value)
+#define PACK_REFLECTION_MAP(flags, value)   PACK_BITS(REFLECTION_MAP_BITS,   REFLECTION_MAP_OFFSET,  flags, value)
+#define PACK_LIGHT_MAP(flags, value)        PACK_BITS(LIGHT_MAP_BITS,        LIGHT_MAP_OFFSET,       flags, value)
+#define PACK_HEIGHT_MAP(flags, value)       PACK_BITS(HEIGHT_MAP_BITS,       HEIGHT_MAP_OFFSET,      flags, value)
+#define PACK_ALPHA_MODE(flags, value)       PACK_BITS(ALPHA_MODE_BITS,       ALPHA_MODE_OFFSET,      flags, value)
+#define PACK_DOUBLE_SIDED(flags, value)     PACK_BITS(DOUBLE_SIDED_BITS,     DOUBLE_SIDED_OFFSET,    flags, value)
+#define PACK_NDF_TYPE(flags, value)         PACK_BITS(NDF_BITS,              NDF_OFFSET,             flags, value)
 
 struct MaterialTextures
 {
-    Texture2D layers[MatMaxLayers];        // A single texture per layer
-    Texture2D alphaMap;         // Alpha test parameter, if texture is non-null, alpha test is enabled, alpha threshold is stored in the constant color
-    Texture2D normalMap;        // Normal map modifier, if texture is non-null, shading normal is perturbed
-    Texture2D heightMap;        // Height (displacement) map modifier, if texture is non-null, one can apply a displacement or parallax mapping
-    Texture2D ambientMap;       // Ambient occlusion map
+    Texture2D diffuse;          // RGB - diffuse color, A - transparency
+    Texture2D specular;         // RGB - specular color, A - roughness
+    Texture2D emissive;         // RGB - emissive color, A - unused
+    Texture2D normalMap;        // 2 or 3 channel normal map, depending on the type
+    Texture2D occlusionMap;     // Ambient occlusion map
+    Texture2D reflectionMap;    // Reflection map
+    Texture2D lightMap;         // Light map
+    Texture2D heightMap;        // Height map. Not used by the default material system
 };
 
 struct MaterialData
 {
-    MaterialDesc desc;
-    MaterialValues values;
+    vec4 diffuse  DEFAULTS(vec4(1.0f));
+    vec4 specular DEFAULTS(vec4(1.0f));
+    vec4 emissive DEFAULTS(vec4(1.0f));
+
+    float alphaThreshold DEFAULTS(0.5f); // Used in case the alpha mode is mask
+    float IoR DEFAULTS(1);               // Index of refraction
+    uint32_t id;
+    uint32_t flags DEFAULTS(0);
+
     MaterialTextures textures;
-    SamplerState samplerState;  // The sampler state to use when sampling the object
-};
-
-struct PreparedMaterialData
-{
-    MaterialDesc    desc;
-    MaterialValues  values;
-};
-
-/**
-    The structure stores the complete information about the shading point,
-    except for a light source information.
-    It stores pre-evaluated material parameters with pre-fetched textures,
-    shading point position, normal, viewing direction etc.
-*/
-struct ShadingAttribs
-{
-    float3    P;                                  ///< Shading hit position in world space
-    float3    E;                                  ///< Direction to the eye at shading hit
-    float3    N;                                  ///< Shading normal at shading hit
-    float3    T;                                  ///< Shading tangent at shading hit
-    float3    B;                                  ///< Shading bitangent at shading hit
-    float2    UV;                                 ///< Texture mapping coordinates
-
-#ifdef _MS_USER_DERIVATIVES
-    float2    DPDX            DEFAULTS(float2(0, 0));                                  
-    float2    DPDY            DEFAULTS(float2(0, 0)); ///< User-provided 2x2 full matrix of duv/dxy derivatives of a shading point footprint in texture space
-#else
-    float   lodBias         DEFAULTS(0);        ///< LOD bias to use when sampling textures
-#endif
-
-#ifdef _MS_USER_HALF_VECTOR_DERIVATIVES
-    float2    DHDX            DEFAULTS(float2(0, 0));
-    float2    DHDY            DEFAULTS(float2(0, 0));  ///< User-defined half-vector derivatives
-#endif
-    PreparedMaterialData preparedMat;               ///< Copy of the original material with evaluated parameters (i.e., textures are fetched etc.)
-    float aoFactor;
 };
 
 /*******************************************************************
@@ -245,21 +244,21 @@ struct ShadingAttribs
 */
 struct LightData
 {
-    float3            worldPos           DEFAULTS(float3(0, 0, 0));     ///< World-space position of the center of a light source
-    uint32_t        type               DEFAULTS(LightPoint);      ///< Type of the light source (see above)
-    float3            worldDir           DEFAULTS(float3(0, -1, 0));    ///< World-space orientation of the light source
-    float           openingAngle       DEFAULTS(3.14159265f);     ///< For point (spot) light: Opening angle of a spot light cut-off, pi by default - full-sphere point light
-    float3            intensity          DEFAULTS(float3(1, 1, 1));     ///< Emitted radiance of th light source
-    float           cosOpeningAngle    DEFAULTS(-1.f);            ///< For point (spot) light: cos(openingAngle), -1 by default because openingAngle is pi by default
-    float3            aabbMin            DEFAULTS(float3(1e20f));       ///< For area light: minimum corner of the AABB
-    float           penumbraAngle      DEFAULTS(0.f);             ///< For point (spot) light: Opening angle of penumbra region in radians, usually does not exceed openingAngle. 0.f by default, meaning a spot light with hard cut-off
-    float3            aabbMax            DEFAULTS(float3(-1e20f));      ///< For area light: maximum corner of the AABB
-    float           surfaceArea        DEFAULTS(0.f);             ///< Surface area of the geometry mesh
-	float3            tangent            DEFAULTS(float3());          ///< Tangent vector of the geometry mesh
-	uint32_t        numIndices         DEFAULTS(0);               ///< Number of triangle indices in a polygonal area light
-	float3            bitangent          DEFAULTS(float3());          ///< BiTangent vector of the geometry mesh
-	float           pad;
-    float4x4            transMat           DEFAULTS(float4x4());          ///< Transformation matrix of the model instance for area lights
+    float3   worldPos           DEFAULTS(float3(0, 0, 0));  ///< World-space position of the center of a light source
+    uint32_t type               DEFAULTS(LightPoint);       ///< Type of the light source (see above)
+    float3   worldDir           DEFAULTS(float3(0, -1, 0)); ///< World-space orientation of the light source
+    float    openingAngle       DEFAULTS(3.14159265f);      ///< For point (spot) light: Opening angle of a spot light cut-off, pi by default - full-sphere point light
+    float3   intensity          DEFAULTS(float3(1, 1, 1));  ///< Emitted radiance of th light source
+    float    cosOpeningAngle    DEFAULTS(-1.f);             ///< For point (spot) light: cos(openingAngle), -1 by default because openingAngle is pi by default
+    float3   aabbMin            DEFAULTS(float3(1e20f));    ///< For area light: minimum corner of the AABB
+    float    penumbraAngle      DEFAULTS(0.f);              ///< For point (spot) light: Opening angle of penumbra region in radians, usually does not exceed openingAngle. 0.f by default, meaning a spot light with hard cut-off
+    float3   aabbMax            DEFAULTS(float3(-1e20f));   ///< For area light: maximum corner of the AABB
+    float    surfaceArea        DEFAULTS(0.f);              ///< Surface area of the geometry mesh
+	float3   tangent            DEFAULTS(float3());         ///< Tangent vector of the geometry mesh
+	uint32_t numIndices         DEFAULTS(0);                ///< Number of triangle indices in a polygonal area light
+	float3   bitangent          DEFAULTS(float3());         ///< BiTangent vector of the geometry mesh
+	float    pad;
+    float4x4 transMat           DEFAULTS(float4x4());       ///< Transformation matrix of the model instance for area lights
 
     // For area light
 // 	BufPtr          indexPtr;                                     ///< Buffer id for indices
@@ -456,12 +455,6 @@ struct DispatchArguments
 };
 
 #ifdef HOST_CODE
-static_assert((sizeof(MaterialValues) % sizeof(float4)) == 0, "MaterialValue has a wrong size");
-static_assert((sizeof(MaterialLayerDesc) % sizeof(float4)) == 0, "MaterialLayerDesc has a wrong size");
-static_assert((sizeof(MaterialLayerValues) % sizeof(float4)) == 0, "MaterialLayerValues has a wrong size");
-static_assert((sizeof(MaterialDesc) % sizeof(float4)) == 0, "MaterialDesc has a wrong size");
-static_assert((sizeof(MaterialValues) % sizeof(float4)) == 0, "MaterialValues has a wrong size");
-static_assert((sizeof(MaterialData) % sizeof(float4)) == 0, "MaterialData has a wrong size");
 #undef SamplerState
 #undef Texture2D
 } // namespace Falcor

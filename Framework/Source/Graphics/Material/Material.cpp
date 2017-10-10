@@ -88,16 +88,17 @@ namespace Falcor
         updateSpecularType();
     }
 
-    void Material::setEmissiveColor(const vec4& color)
+    void Material::setEmissiveColor(const vec3& color)
     {
         mData.emissive = color;
         updateEmissiveType();
     }
 
-    static uint32_t getChannelMode(bool hasTexture, const vec4& color)
+    template<typename vec>
+    static uint32_t getChannelMode(bool hasTexture, const vec& color)
     {
         if (hasTexture) return ChannelTypeTexture;
-        if (color == vec4(0)) return ChannelTypeUnused;
+        if (luminance(color) == 0) return ChannelTypeUnused;
         return ChannelTypeConst;
     }
 
@@ -160,5 +161,30 @@ namespace Falcor
     {
         mData.textures.heightMap = pHeightMap;
         mData.flags = PACK_HEIGHT_MAP(mData.flags, pHeightMap ? 1 : 0);
+    }
+
+    bool Material::operator==(const Material& other) const 
+    {
+#define compare_field(_a) if (mData._a != other.mData._a) return false
+        compare_field(diffuse);
+        compare_field(specular);
+        compare_field(emissive);
+        compare_field(alphaThreshold);
+        compare_field(IoR);
+        compare_field(flags);
+        compare_field(heightScaleOffset);
+#undef compare_field
+
+#define compare_texture(_a) if (mData.textures._a != other.mData.textures._a) return false
+        compare_texture(diffuse);
+        compare_texture(specular);
+        compare_texture(emissive);
+        compare_texture(normalMap);
+        compare_texture(occlusionMap);
+        compare_texture(reflectionMap);
+        compare_texture(lightMap);
+        compare_texture(heightMap);
+#undef compare_texture
+        return true;
     }
 }

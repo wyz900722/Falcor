@@ -165,11 +165,11 @@ namespace Falcor
 
         /** Set the emissive color
         */
-        void setEmissiveColor(const vec4& color);
+        void setEmissiveColor(const vec3& color);
 
         /** Get the emissive color
         */
-        const vec4& getSEmissiveColor() const { return mData.emissive; }
+        const vec3& getSEmissiveColor() const { return mData.emissive; }
 
         /** Set the alpha mode
         */
@@ -206,6 +206,30 @@ namespace Falcor
         /** Get the flags
         */
         uint32_t getFlags() const { return mData.flags; }
+
+        /** Set the height scale and offset
+        */
+        void setHeightScaleOffset(float scale, float offset);
+
+        /** Get the height scale
+        */
+        float getHeightScale() const { return mData.heightScaleOffset.x; }
+
+        /** Get the height offset
+        */
+        float getHeightOffset() const { return mData.heightScaleOffset.y; }
+
+        /** Set the index of refraction
+        */
+        void setIndexOfRefraction(float IoR) { mData.IoR = IoR; }
+
+        /** Get the index of refraction
+        */
+        float getIndexOfRefraction() const { return mData.IoR; }
+
+        /** Comparison operator
+        */
+        bool operator==(const Material& other) const;
     private:
         void updateDiffuseType();
         void updateSpecularType();

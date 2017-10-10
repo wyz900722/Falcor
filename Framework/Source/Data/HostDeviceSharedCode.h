@@ -223,14 +223,18 @@ struct MaterialTextures
 
 struct MaterialData
 {
-    vec4 diffuse  DEFAULTS(vec4(1.0f));
-    vec4 specular DEFAULTS(vec4(1.0f));
-    vec4 emissive DEFAULTS(vec4(1.0f));
+    vec4 diffuse  DEFAULTS(vec4(1));
+    vec4 specular DEFAULTS(vec4(1));
+    vec3 emissive DEFAULTS(vec3(1));
+    float padf    DEFAULTS(0);
 
     float alphaThreshold DEFAULTS(0.5f); // Used in case the alpha mode is mask
     float IoR DEFAULTS(1);               // Index of refraction
     uint32_t id;
     uint32_t flags DEFAULTS(0);
+
+    vec2 heightScaleOffset  DEFAULTS(vec2(1, 0));
+    vec2 pad                DEFAULTS(vec2(0));
 
     MaterialTextures textures;
 };

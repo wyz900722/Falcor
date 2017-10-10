@@ -101,7 +101,7 @@ namespace Falcor
 
         /** Set the shading model
         */
-        void setShadingModel(uint32_t model);
+        void setShadingModel(uint32_t model) { mData.flags = PACK_SHADING_MODEL(mData.flags, model); }
 
         /** Get the shading model
         */
@@ -202,7 +202,15 @@ namespace Falcor
         /** Get the NDF type
         */
         uint32_t getNdfType() const { return EXTRACT_NDF_TYPE(mData.flags); }
+
+        /** Get the flags
+        */
+        uint32_t getFlags() const { return mData.flags; }
     private:
+        void updateDiffuseType();
+        void updateSpecularType();
+        void updateEmissiveType();
+
         Material(const std::string& name);
         std::string mName;
         MaterialData mData;

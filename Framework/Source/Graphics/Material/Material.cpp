@@ -57,4 +57,108 @@ namespace Falcor
     {
         sMaterialCounter = 0;
     }
+
+    void Material::setDiffuseTexture(Texture::SharedPtr& pDiffuse)
+    {
+        mData.textures.diffuse = pDiffuse;
+        updateDiffuseType();
+    }
+
+    void Material::setSpecularTexture(Texture::SharedPtr pSpecular)
+    {
+        mData.textures.specular = pSpecular;
+        updateSpecularType();
+    }
+
+    void Material::setEmissiveTexture(Texture::SharedPtr& pEmissive)
+    {
+        mData.textures.emissive = pEmissive;
+        updateEmissiveType();
+    }
+
+    void Material::setDiffuseColor(const vec4& color)
+    {
+        mData.diffuse = color;
+        updateDiffuseType();
+    }
+
+    void Material::setSpecularColor(const vec4& color)
+    {
+        mData.specular = color;
+        updateSpecularType();
+    }
+
+    void Material::setEmissiveColor(const vec4& color)
+    {
+        mData.emissive = color;
+        updateEmissiveType();
+    }
+
+    static uint32_t getChannelMode(bool hasTexture, const vec4& color)
+    {
+        if (hasTexture) return ChannelTypeTexture;
+        if (color == vec4(0)) return ChannelTypeUnused;
+        return ChannelTypeConst;
+    }
+
+    void Material::updateDiffuseType()
+    {
+        mData.flags = PACK_DIFFUSE_TYPE(mData.flags, getChannelMode(mData.textures.diffuse != nullptr, mData.diffuse));
+    }
+
+    void Material::updateSpecularType()
+    {
+        mData.flags = PACK_SPECULAR_TYPE(mData.flags, getChannelMode(mData.textures.specular != nullptr, mData.specular));
+    }
+
+    void Material::updateEmissiveType()
+    {
+        mData.flags = PACK_EMISSIVE_TYPE(mData.flags, getChannelMode(mData.textures.emissive != nullptr, mData.emissive));
+    }
+
+    void Material::setNormalMap(Texture::SharedPtr pNormalMap)
+    {
+        mData.textures.normalMap = pNormalMap;
+        uint32_t normalMode = NormalMapUnused;
+        if (pNormalMap)
+        {
+            switch(getFormatChannelCount(pNormalMap->getFormat()))
+            {
+            case 2:
+                normalMode = NormalMapRG;
+                break;
+            case 3:
+                normalMode = NormalMapRGB;
+                break;
+            default:
+                should_not_get_here();
+                logWarning("Unsupported normal map format for material " + mName);
+            }
+        }
+        mData.flags = PACK_NORMAL_MAP_TYPE(mData.flags, normalMode);
+    }
+
+    void Material::setOcclusionMap(Texture::SharedPtr pOcclusionMap)
+    {
+        mData.textures.occlusionMap = pOcclusionMap;
+        mData.flags = PACK_OCCLUSION_MAP(mData.flags, pOcclusionMap ? 1 : 0);
+    }
+
+    void Material::setReflectionMap(Texture::SharedPtr pReflectionMap)
+    {
+        mData.textures.reflectionMap = pReflectionMap;
+        mData.flags = PACK_REFLECTION_MAP(mData.flags, pReflectionMap ? 1 : 0);
+    }
+
+    void Material::setLightMap(Texture::SharedPtr pLightMap)
+    {
+        mData.textures.lightMap = pLightMap;
+        mData.flags = PACK_LIGHT_MAP(mData.flags, pLightMap ? 1 : 0);
+    }
+
+    void Material::setHeightMap(Texture::SharedPtr pHeightMap)
+    {
+        mData.textures.heightMap = pHeightMap;
+        mData.flags = PACK_HEIGHT_MAP(mData.flags, pHeightMap ? 1 : 0);
+    }
 }

@@ -25,9 +25,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
-__import ShaderCommon;
-__import Shading;
 __import DefaultVS;
+__import ShaderCommon;
 
 cbuffer PerFrameCB : register(b0)
 {
@@ -45,18 +44,8 @@ float4 main(VS_OUT vOut) : SV_TARGET
     }
     else
     {
-        ShadingAttribs shAttr;
-        prepareShadingAttribs(gMaterial, vOut.posW, gCam.position, vOut.normalW, vOut.bitangentW, vOut.texC, shAttr);
 
-        ShadingOutput result;
-
-        // Directional light
-        evalMaterial(shAttr, gDirLight, result, true);
-
-        // Point light
-        evalMaterial(shAttr, gPointLight, result, false);
-
-        float4 finalColor = float4(result.finalValue + gAmbient * result.diffuseAlbedo, 1.f);
+        float4 finalColor = gMaterial.textures.diffuse.Sample(gMaterial.samplerState, vOut.texC);
         return finalColor;
     }
 }

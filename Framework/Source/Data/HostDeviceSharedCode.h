@@ -223,9 +223,9 @@ struct MaterialTextures
 
 struct MaterialData
 {
-    vec4 diffuse  DEFAULTS(vec4(1));
-    vec4 specular DEFAULTS(vec4(1));
-    vec3 emissive DEFAULTS(vec3(1));
+    float4 diffuse  DEFAULTS(float4(1));
+    float4 specular DEFAULTS(float4(1));
+    float3 emissive DEFAULTS(float3(1));
     float padf    DEFAULTS(0);
 
     float alphaThreshold DEFAULTS(0.5f); // Used in case the alpha mode is mask
@@ -233,8 +233,8 @@ struct MaterialData
     uint32_t id;
     uint32_t flags DEFAULTS(0);
 
-    vec2 heightScaleOffset  DEFAULTS(vec2(1, 0));
-    vec2 pad                DEFAULTS(vec2(0));
+    float2 heightScaleOffset  DEFAULTS(float2(1, 0));
+    float2 pad                DEFAULTS(float2(0));
 
     MaterialTextures textures;
     SamplerState samplerState;

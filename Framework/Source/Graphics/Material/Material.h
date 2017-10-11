@@ -242,10 +242,6 @@ namespace Falcor
         /** Bind the material to a program variables object
         */
         void setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, const char* varName) const;
-
-        /** Bind the material to a program variables object
-        */
-        void setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, uint32_t offset) const;
     private:
         void updateDiffuseType();
         void updateSpecularType();

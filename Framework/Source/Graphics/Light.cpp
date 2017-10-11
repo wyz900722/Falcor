@@ -117,7 +117,7 @@ namespace Falcor
         // Update material
         if (light.type == LightArea)
         {
-            for (int i = 0; i < MatMaxLayers; ++i)
+//            for (int i = 0; i < MatMaxLayers; ++i)
             {
                 /*TODO(tfoley) HACK:SPIRE
                 if (light.material.desc.layers[i].type == MatEmissive)

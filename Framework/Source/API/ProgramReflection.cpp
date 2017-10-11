@@ -72,7 +72,7 @@ namespace Falcor
         offset = kInvalidLocation;
 
         // Look for the variable
-        auto&& var = mVariables.find(name);
+        auto var = mVariables.find(name);
 
 #ifdef FALCOR_DX11
         if (var == mVariables.end())
@@ -109,6 +109,10 @@ namespace Falcor
                     logError(msg + "Array index (" + std::to_string(arrayIndex) + ") out-of-range. Array size == " + std::to_string(data.arraySize) + ".");
                     return nullptr;
                 }
+            }
+            else
+            {
+                return nullptr;
             }
         }
 

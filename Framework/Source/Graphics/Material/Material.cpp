@@ -129,6 +129,7 @@ namespace Falcor
                 normalMode = NormalMapRG;
                 break;
             case 3:
+            case 4: // Some texture formats don't support RGB, only RGBA. We have no use for the alpha channel in the normal map.
                 normalMode = NormalMapRGB;
                 break;
             default:
@@ -188,13 +189,51 @@ namespace Falcor
         return true;
     }
 
-    void Material::setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, uint32_t offset) const
-    {
-
-    }
+#if _LOG_ENABLED
+#define check_offset(_a) assert(pCB->getVariableOffset(std::string(varName) + "." + #_a) == (offsetof(MaterialData, _a) + offset))
+#else
+#define check_offset(_a)
+#endif
 
     void Material::setIntoProgramVars(ProgramVars* pVars, ConstantBuffer* pCB, const char* varName) const
     {
+        // OPTME:
+        // First set the desc and the values
+        static const size_t dataSize = sizeof(MaterialData);
+        static_assert(dataSize % sizeof(glm::vec4) == 0, "Material::MaterialData size should be a multiple of 16");
+        size_t offset = pCB->getVariableOffset(std::string(varName) + ".diffuse");
 
+        if (offset == ConstantBuffer::kInvalidOffset)
+        {
+            logError(std::string("Material::setIntoConstantBuffer() - variable \"") + varName + "\"not found in constant buffer\n");
+            return;
+        }
+
+        check_offset(emissive);
+        check_offset(heightScaleOffset);
+        assert(offset + dataSize <= pCB->getSize());
+
+        pCB->setBlob(&mData, offset, dataSize);
+
+        // Now set the textures
+        std::string resourceName = std::string(varName) + ".textures.diffuse";
+        const auto pResourceDesc = pVars->getReflection()->getResourceDesc(resourceName);
+        if (pResourceDesc == nullptr)
+        {
+            logWarning(std::string("Material::setIntoConstantBuffer() - can't find the first texture object"));
+            return;
+        }
+        uint32_t regIndex = pResourceDesc->regIndex;
+#define set_texture(texName) if(mData.textures.texName) pVars->setSrv(pResourceDesc->regSpace, regIndex, 0, mData.textures.texName->getSRV()); regIndex++
+        set_texture(diffuse);
+        set_texture(specular);
+        set_texture(emissive);
+        set_texture(normalMap);
+        set_texture(occlusionMap);
+        set_texture(reflectionMap);
+        set_texture(lightMap);
+        set_texture(heightMap);
+#undef set_texture
+        pVars->setSampler(std::string(varName)  + ".samplerState", mData.samplerState);
     }
 }

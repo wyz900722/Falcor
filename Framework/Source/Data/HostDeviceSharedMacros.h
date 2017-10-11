@@ -119,44 +119,4 @@
 //#define LightVolume        3    ///< Volumetric light source
 
 #define MAX_LIGHT_SOURCES 16
-
-/*******************************************************************
-                    Material
-*******************************************************************/
-
-/** Type of the material layer:
-    Diffuse (Lambert model, can be Oren-Nayar if roughness is not 1),
-    Reflective material (conductor),
-    Refractive material (dielectric)
-*/
-#define     MatNone            0            ///< A "null" material. Used to end the list of layers
-#define     MatLambert         1            ///< A simple diffuse Lambertian BRDF layer
-#define     MatConductor       2            ///< A conductor material, metallic reflection, no refraction nor subscattering
-#define     MatDielectric      3            ///< A refractive dielectric material, if applied on top of others acts like a coating
-#define     MatEmissive        4            ///< An emissive material. Can be assigned to a geometry to create geometric a light source (will be supported only with ray tracing)
-#define     MatUser            5            ///< User-defined material, should be parsed and processed by user
-#define     MatNumTypes        (MatUser+1)  ///< Number of material types
-
-/** Type of used Normal Distribution Function (NDF). Options so far
-    Beckmann distribution (original Blinn-Phong)
-    GGX distribution (smoother highlight, better fit for some materials, default)
-*/
-#define     NDFBeckmann        0    ///< Beckmann distribution for NDF
-#define     NDFGGX             1    ///< GGX distribution for NDF
-#define     NDFUser            2    ///< User-defined distribution for NDF, should be processed by user
-
-#define     BlendFresnel       0    ///< Material layer is blended according to Fresnel
-#define     BlendConstant      1    ///< Material layer is blended according to a constant factor stored in w component of constant color
-#define     BlendAdd           2    ///< Material layer is added to the previous layers
-
-/**
-    This number specifies a maximum possible number of layers in a material.
-    There seems to be a good trade-off between performance and flexibility.
-    With three layers, we can represent e.g. a base conductor material with diffuse component, coated with a dielectric.
-    If this number is changed, the scene serializer should make sure the new number of layers is saved/loaded correctly.
-*/
-#define     MatMaxLayers    3
-
-#define ROUGHNESS_CHANNEL_BIT 2
-
 #endif //_HOST_DEVICE_SHARED_MACROS_H

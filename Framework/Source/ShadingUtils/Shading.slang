@@ -42,7 +42,26 @@ struct HitPointData
     float3    tangent;      ///< Shading tangent at shading hit
     float3    bitangent;    ///< Shading bitangent at shading hit
     float2    uv;           ///< Texture mapping coordinates
+
+    // Pre-loaded texture data
+    float4 diffuse;
+    float4 specular;
+    float4 emissive;
+    float4 occlusion;
+    float4 reflection;
+    float4 bakedLight;
+    float4 height;
 };
+
+/** Load data from a texture
+*/
+float4 sampleTexture(Texture2D t, SamplerState s, float2 uv, float4 factor, uint mode)
+{
+    if(mode == ChannelTypeUnused) return 0;
+    if(mode == ChannelTypeConst) return factor;
+    // else mode == ChannelTypeTexture
+    return t.Sample(s, uv);
+}
 
 /** Shading result struct
 */
@@ -50,7 +69,7 @@ struct ShadingResult
 {
     float3 diffuseIllumination;
     float3 specularIllumination;
-    float3 finalResult;
+    float3 color;
 };
 
 /** Convert RGB to normal
@@ -100,11 +119,10 @@ void applyNormalMap(in MaterialData m, inout HitPointData hitPt)
 
 /** Apply alpha-test
 */
-void applyAlphaTest(MaterialData m, float2 texC)
+void applyAlphaTest(MaterialData m, float alpha)
 {
     if(EXTRACT_ALPHA_MODE(m.flags) == AlphaModeMask)
     {
-        float alpha = m.textures.diffuse.Sample(m.samplerState, texC).a;
         if(alpha < m.alphaThreshold) discard;
     }
 }
@@ -113,16 +131,29 @@ void applyAlphaTest(MaterialData m, float2 texC)
 */
 HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 camPosW)
 {
-    // Apply alpha test first
-    applyAlphaTest(m, v.texC);
-
     HitPointData hitPt;
+    // Sample the diffuse texture and apply the alpha test
+    hitPt.diffuse = sampleTexture(m.textures.diffuse, m.samplerState, v.texC, m.diffuse, EXTRACT_DIFFUSE_TYPE(m.flags));
+    applyAlphaTest(m, hitPt.diffuse.a);
+
     hitPt.posW = v.posW;
     hitPt.uv = v.texC;
     hitPt.toEye     = normalize(camPosW - v.posW);
     hitPt.normal    = normalize(v.normalW);
     hitPt.bitangent = normalize(v.bitangentW - hitPt.normal * (dot(v.bitangentW, hitPt.normal)));
     hitPt.tangent   = normalize(cross(hitPt.bitangent, hitPt.normal));
+
+    // Sample the rest of the texture
+    hitPt.specular = sampleTexture(m.textures.specular, m.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags));
+    hitPt.emissive = sampleTexture(m.textures.emissive, m.samplerState, v.texC, float4(m.emissive, 1), EXTRACT_EMISSIVE_TYPE(m.flags));
+
+#define channel_type(extract) (extract(m.flags) ? ChannelTypeTexture : ChannelTypeUnused)
+    hitPt.occlusion = sampleTexture(m.textures.occlusionMap, m.samplerState, v.texC, 1, channel_type(EXTRACT_OCCLUSION_MAP));
+    hitPt.reflection = sampleTexture(m.textures.reflectionMap, m.samplerState, v.texC, 1, channel_type(EXTRACT_REFLECTION_MAP));
+    hitPt.bakedLight = sampleTexture(m.textures.lightMap, m.samplerState, v.texC, 1, channel_type(EXTRACT_LIGHT_MAP));
+    hitPt.height = sampleTexture(m.textures.heightMap, m.samplerState, v.texC, 1, channel_type(EXTRACT_HEIGHT_MAP));
+    hitPt.height.xy = hitPt.height.xy * m.heightScaleOffset.x + m.heightScaleOffset.y;
+#undef channel_type
 
     applyNormalMap(m, hitPt);
 
@@ -132,13 +163,24 @@ HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 ca
 /** Shading routines
 */
 
+float3 evalDiffuse(in HitPointData hitPt, in MaterialData mat, in LightSample ls)
+{
+    float ndotl = dot(ls.dirW, hitPt.normal);
+    float3 albedo = mat.textures.diffuse.Sample(mat.samplerState, hitPt.uv).rgb;
+    albedo *= (1 / 3.141591);
+    albedo *= ndotl * ls.intensity;
+    return albedo;
+}
+
 ShadingResult evalMaterial(in HitPointData hitPt, in MaterialData mat, in LightData light, in float shadowFactor)
 {
     ShadingResult sr;
     sr.diffuseIllumination = 0;
     sr.specularIllumination = 0;
     LightSample ls = evalLight(light, hitPt.posW);
-    sr.finalResult = ls.intensity;
+
+    sr.color = evalDiffuse(hitPt, mat, ls);
+
     return sr;
 };
 

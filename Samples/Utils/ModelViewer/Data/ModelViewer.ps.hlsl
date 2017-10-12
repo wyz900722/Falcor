@@ -44,8 +44,8 @@ float4 main(VertexOut vOut) : SV_TARGET
     else
     {
         HitPointData hitPt = prepareHitPointData(vOut, gMaterial, gCam.position);
-        ShadingResult sr = evalMaterial(hitPt, gMaterial, gPointLight, 1);
-        float4 finalColor = float4(sr.finalResult, 1);
+        ShadingResult sr = evalMaterial(hitPt, gMaterial, gDirLight, 1);
+        float4 finalColor = hitPt.diffuse;
         return finalColor;
     }
 }

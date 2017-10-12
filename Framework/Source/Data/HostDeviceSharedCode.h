@@ -169,9 +169,9 @@ struct MaterialData
 */
 struct LightData
 {
-    float3   worldPos           DEFAULTS(float3(0, 0, 0));  ///< World-space position of the center of a light source
+    float3   posW               DEFAULTS(float3(0, 0, 0));  ///< World-space position of the center of a light source
     uint32_t type               DEFAULTS(LightPoint);       ///< Type of the light source (see above)
-    float3   worldDir           DEFAULTS(float3(0, -1, 0)); ///< World-space orientation of the light source
+    float3   dirW               DEFAULTS(float3(0, -1, 0)); ///< World-space orientation of the light source
     float    openingAngle       DEFAULTS(3.14159265f);      ///< For point (spot) light: Opening angle of a spot light cut-off, pi by default - full-sphere point light
     float3   intensity          DEFAULTS(float3(1, 1, 1));  ///< Emitted radiance of th light source
     float    cosOpeningAngle    DEFAULTS(-1.f);             ///< For point (spot) light: cos(openingAngle), -1 by default because openingAngle is pi by default

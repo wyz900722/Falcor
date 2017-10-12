@@ -676,7 +676,7 @@ namespace Falcor
             {
                 const auto& pLight = mpScene->getLight(mLightIDEditorToScene[i]);
                 auto& pModelInstance = mpEditorScene->getModelInstance(mEditorLightModelID, i);
-                pModelInstance->setTranslation(pLight->getData().worldPos, true);
+                pModelInstance->setTranslation(pLight->getData().posW, true);
             }
         }
 

@@ -26,7 +26,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
 #include "VertexAttrib.h"
-
 __import ShaderCommon;
 
 struct VertexIn

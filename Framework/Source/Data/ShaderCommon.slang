@@ -25,11 +25,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
-
-/*******************************************************************
-                    Common OGL bindings
-*******************************************************************/
-
 #ifndef _FALCOR_SHADER_COMMON_H_
 #define _FALCOR_SHADER_COMMON_H_
 

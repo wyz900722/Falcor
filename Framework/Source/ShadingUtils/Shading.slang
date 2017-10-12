@@ -25,10 +25,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
-#ifndef _FALCOR_SHADING_H_
-#define _FALCOR_SHADING_H_
+#ifndef _FALCOR_SHADING_SLANG_
+#define _FALCOR_SHADING_SLANG_
 #import "HostDeviceData.h"
 __import DefaultVS;
+__import Lights;
 
 /** This struct desribes the geometric data for a specific hit point used for lighting calculations 
 */
@@ -40,6 +41,15 @@ struct HitPointData
     float3    tangent;      ///< Shading tangent at shading hit
     float3    bitangent;    ///< Shading bitangent at shading hit
     float2    uv;           ///< Texture mapping coordinates
+};
+
+/** Shading result struct
+*/
+struct ShadingResult
+{
+    float3 diffuseIllumination;
+    float3 specularIllumination;
+    float3 finalResult;
 };
 
 /** Convert RGB to normal
@@ -98,6 +108,8 @@ void applyAlphaTest(MaterialData m, float2 texC)
     }
 }
 
+/** Prepare the hit-point data
+*/
 HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 camPosW)
 {
     // Apply alpha test first
@@ -116,4 +128,17 @@ HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 ca
     return hitPt;
 }
 
-#endif	// _FALCOR_SHADING_H_
+/** Shading routines
+*/
+
+ShadingResult evalMaterial(in HitPointData hitPt, in MaterialData mat, in LightData light, in float shadowFactor)
+{
+    ShadingResult sr;
+    sr.diffuseIllumination = 0;
+    sr.specularIllumination = 0;
+    LightSample ls = evalLight(light, hitPt.posW);
+    sr.finalResult = ls.intensity;
+    return sr;
+};
+
+#endif	// _FALCOR_SHADING_SLANG_

@@ -166,8 +166,9 @@ HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 ca
 float3 evalDiffuse(in HitPointData hitPt, in MaterialData mat, in LightSample ls)
 {
     float ndotl = dot(ls.dirW, hitPt.normal);
+    ndotl = EXTRACT_DOUBLE_SIDED(mat.flags) ? abs(ndotl) : saturate(ndotl);
     float3 albedo = mat.textures.diffuse.Sample(mat.samplerState, hitPt.uv).rgb;
-    albedo *= (1 / 3.141591);
+    albedo *= (1 / M_PI);
     albedo *= ndotl * ls.intensity;
     return albedo;
 }

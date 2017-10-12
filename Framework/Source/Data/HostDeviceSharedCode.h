@@ -101,20 +101,20 @@ This is a general host/device structure that describe a camera.
 */
 struct CameraData
 {
-    float4x4 viewMat                DEFAULTS(float4x4());       ///< Camera view matrix.
-    float4x4 projMat                DEFAULTS(float4x4());       ///< Camera projection matrix.
-    float4x4 viewProjMat            DEFAULTS(float4x4());       ///< Camera view-projection matrix.
-    float4x4 invViewProj            DEFAULTS(float4x4());       ///< Camera inverse view-projection matrix.
-    float4x4 prevViewProjMat        DEFAULTS(float4x4());       ///< Camera view-projection matrix associated to previous frame.
+    float4x4 viewMat;               ///< Camera view matrix.
+    float4x4 projMat                ///< Camera projection matrix.
+    float4x4 viewProjMat            ///< Camera view-projection matrix.
+    float4x4 invViewProj            ///< Camera inverse view-projection matrix.
+    float4x4 prevViewProjMat        ///< Camera view-projection matrix associated to previous frame.
 
-    float3   position               DEFAULTS(float3(0, 0, 0));  ///< Camera world-space position.
+    float3   position                                           ///< Camera world-space position.
     float    focalLength            DEFAULTS(21.0f);            ///< Camera focal length in mm. Default is 59 degree vertical, 90 horizontal FOV at 16:9 aspect ratio.
     float3   up                     DEFAULTS(float3(0, 1, 0));  ///< Camera world-space up vector.
-    float    aspectRatio            DEFAULTS(1.f);              ///< Camera aspect ratio.
+    float    aspectRatio            DEFAULTS(1.7777f);          ///< 16:9 aspect-ratio
     float3   target                 DEFAULTS(float3(0, 0, -1)); ///< Camera target point in world-space.
     float    nearZ                  DEFAULTS(0.1f);             ///< Camera near plane.
     float3   cameraU                DEFAULTS(float3(0, 0, 1));  ///< Camera base vector U. normalized it indicates the left image plane vector. The length is dependent on the FOV. 
-    float    farZ                   DEFAULTS(10000.0f);         ///< Camera far plane.
+    float    farZ                   DEFAULTS(1000.0f);          ///< Camera far plane.
     float3   cameraV                DEFAULTS(float3(0, 1, 0));  ///< Camera base vector V. normalized it indicates the up image plane vector. The length is dependent on the FOV. 
     float    jitterX                DEFAULTS(0.0f);             ///< Eventual camera jitter in the x coordinate
     float3   cameraW                DEFAULTS(float3(1, 0, 0));  ///< Camera base vector U. normalized it indicates the forward direction. The length is the camera focal distance.
@@ -146,7 +146,7 @@ struct MaterialData
     float4 diffuse  DEFAULTS(float4(1));
     float4 specular DEFAULTS(float4(1));
     float3 emissive DEFAULTS(float3(1));
-    float padf    DEFAULTS(0);
+    float padf      DEFAULTS(0);
 
     float alphaThreshold DEFAULTS(0.5f); // Used in case the alpha mode is mask
     float IoR DEFAULTS(1);               // Index of refraction

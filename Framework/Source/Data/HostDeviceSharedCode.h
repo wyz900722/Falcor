@@ -206,22 +206,22 @@ struct LightData
     Reference: http://simonstechblog.blogspot.com/2011/12/microfacet-brdf.html
     \param shininess specular power of an obsolete Phong BSDF
 */
-inline float _fn convertShininessToRoughness(const float shininess)
+inline float convertShininessToRoughness(float shininess)
 {
     return clamp(sqrt(2.0f / (shininess + 2.0f)), 0.f, 1.f);
 }
 
-inline float2 _fn convertShininessToRoughness(const float2 shininess)
+inline float2 convertShininessToRoughness(float2 shininess)
 {
     return clamp(sqrt(2.0f / (shininess + 2.0f)), 0.f, 1.f);
 }
 
-inline float _fn convertRoughnessToShininess(const float a)
+inline float convertRoughnessToShininess(float a)
 {
     return 2.0f / clamp(a*a, 1e-8f, 1.f) - 2.0f;
 }
 
-inline float2 _fn convertRoughnessToShininess(const float2 a)
+inline float2 convertRoughnessToShininess(float2 a)
 {
     return 2.0f / clamp(a*a, 1e-8f, 1.f) - 2.0f;
 }
@@ -234,7 +234,7 @@ Other helpful shared routines
 /** Returns a relative luminance of an input linear RGB color in the ITU-R BT.709 color space
 \param RGBColor linear HDR RGB color in the ITU-R BT.709 color space
 */
-inline float _fn luminance(const float3 rgb)
+inline float luminance(float3 rgb)
 {
     return dot(rgb, float3(0.2126f, 0.7152f, 0.0722f));
 }
@@ -242,60 +242,54 @@ inline float _fn luminance(const float3 rgb)
 /** Converts color from RGB to YCgCo space
 \param RGBColor linear HDR RGB color
 */
-inline float3 _fn RGBToYCgCo(const float3 rgb)
+inline float3 RGBToYCgCo(float3 rgb)
 {
-    const float Y = dot(rgb, float3(0.25f, 0.50f, 0.25f));
-    const float Cg = dot(rgb, float3(-0.25f, 0.50f, -0.25f));
-    const float Co = dot(rgb, float3(0.50f, 0.00f, -0.50f));
-
+    float Y = dot(rgb, float3(0.25f, 0.50f, 0.25f));
+    float Cg = dot(rgb, float3(-0.25f, 0.50f, -0.25f));
+    float Co = dot(rgb, float3(0.50f, 0.00f, -0.50f));
     return float3(Y, Cg, Co);
 }
 
 /** Converts color from YCgCo to RGB space
 \param YCgCoColor linear HDR YCgCo color
 */
-inline float3 _fn YCgCoToRGB(const float3 YCgCo)
+inline float3 YCgCoToRGB(float3 YCgCo)
 {
-    const float tmp = YCgCo.x - YCgCo.y;
-    const float r = tmp + YCgCo.z;
-    const float g = YCgCo.x + YCgCo.y;
-    const float b = tmp - YCgCo.z;
-
+    float tmp = YCgCo.x - YCgCo.y;
+    float r = tmp + YCgCo.z;
+    float g = YCgCo.x + YCgCo.y;
+    float b = tmp - YCgCo.z;
     return float3(r, g, b);
 }
 
 /** Returns a YUV version of an input linear RGB color in the ITU-R BT.709 color space
 \param RGBColor linear HDR RGB color in the ITU-R BT.709 color space
 */
-inline float3 _fn RGBToYUV(const float3 rgb)
+inline float3 RGBToYUV(float3 rgb)
 {
     float3 ret;
-
     ret.x = dot(rgb, float3(0.2126f, 0.7152f, 0.0722f));
     ret.y = dot(rgb, float3(-0.09991f, -0.33609f, 0.436f));
     ret.z = dot(rgb, float3(0.615f, -0.55861f, -0.05639f));
-
     return ret;
 }
 
 /** Returns a RGB version of an input linear YUV color in the ITU-R BT.709 color space
 \param YUVColor linear HDR YUV color in the ITU-R BT.709 color space
 */
-inline float3 _fn YUVToRGB(const float3 yuv)
+inline float3 YUVToRGB(float3 yuv)
 {
     float3 ret;
-
     ret.x = dot(yuv, float3(1.0f, 0.0f, 1.28033f));
     ret.y = dot(yuv, float3(1.0f, -0.21482f, -0.38059f));
     ret.z = dot(yuv, float3(1.0f, 2.12798f, 0.0f));
-
     return ret;
 }
 
 /** Returns a linear-space RGB version of an input RGB channel value in the ITU-R BT.709 color space
 \param sRGBColor sRGB input channel value
 */
-inline float _fn SRGBToLinear(const float srgb)
+inline float sRGBToLinear(float srgb)
 {
     if (srgb <= 0.04045f)
     {
@@ -310,18 +304,18 @@ inline float _fn SRGBToLinear(const float srgb)
 /** Returns a linear-space RGB version of an input RGB color in the ITU-R BT.709 color space
 \param sRGBColor sRGB input color
 */
-inline float3 _fn SRGBToLinear(const float3 srgb)
+inline float3 sRGBToLinear(float3 srgb)
 {
     return float3(
-        SRGBToLinear(srgb.x),
-        SRGBToLinear(srgb.y),
-        SRGBToLinear(srgb.z));
+        sRGBToLinear(srgb.x),
+        sRGBToLinear(srgb.y),
+        sRGBToLinear(srgb.z));
 }
 
 /** Returns a sRGB version of an input linear RGB channel value in the ITU-R BT.709 color space
 \param LinearColor linear input channel value
 */
-inline float _fn LinearToSRGB(const float lin)
+inline float linearToSRGB(float lin)
 {
     if (lin <= 0.0031308f)
     {
@@ -336,20 +330,20 @@ inline float _fn LinearToSRGB(const float lin)
 /** Returns a sRGB version of an input linear RGB color in the ITU-R BT.709 color space
 \param LinearColor linear input color
 */
-inline float3 _fn LinearToSRGB(const float3 lin)
+inline float3 linearToSRGB(float3 lin)
 {
     return float3(
-        LinearToSRGB(lin.x),
-        LinearToSRGB(lin.y),
-        LinearToSRGB(lin.z));
+        linearToSRGB(lin.x),
+        linearToSRGB(lin.y),
+        linearToSRGB(lin.z));
 }
 
 
 /** Returns Michelson contrast given minimum and maximum intensities of an image region
-\param Imin minimum intensity of an image region
-\param Imax maximum intensity of an image region
+\param iMin minimum intensity of an image region
+\param iMax maximum intensity of an image region
 */
-inline float _fn computeMichelsonContrast(const float iMin, const float iMax)
+inline float computeMichelsonContrast(float iMin, float iMax)
 {
     if (iMin == 0.0f && iMax == 0.0f) return 0.0f;
     else return (iMax - iMin) / (iMax + iMin);

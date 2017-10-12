@@ -66,11 +66,11 @@ namespace Falcor
         vec3 bitangent;
         if (abs(normal.x) > abs(normal.y))
         {
-            bitangent = v3(normal.z, 0.f, -normal.x) / length(v2(normal.x, normal.z));
+            bitangent = vec3(normal.z, 0.f, -normal.x) / length(vec2(normal.x, normal.z));
         }
         else
         {
-            bitangent = v3(0.f, normal.z, -normal.y) / length(v2(normal.y, normal.z));
+            bitangent = vec3(0.f, normal.z, -normal.y) / length(vec2(normal.y, normal.z));
         }
         return normalize(bitangent);
     }

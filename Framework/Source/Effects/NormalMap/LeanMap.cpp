@@ -69,15 +69,15 @@ namespace Falcor
                 } break;
                 case ResourceFormat::RGBA8UnormSrgb:
                 {
-                    tn.x = clamp(SRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 0])), 0.0f, 1.0f);
-                    tn.y = clamp(SRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 1])), 0.0f, 1.0f);
-                    tn.z = clamp(SRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 2])), 0.0f, 1.0f);
+                    tn.x = clamp(sRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 0])), 0.0f, 1.0f);
+                    tn.y = clamp(sRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 1])), 0.0f, 1.0f);
+                    tn.z = clamp(sRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 2])), 0.0f, 1.0f);
                 } break;
                 case ResourceFormat::BGRA8UnormSrgb:
                 {
-                    tn.z = clamp(SRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 0])), 0.0f, 1.0f);
-                    tn.y = clamp(SRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 1])), 0.0f, 1.0f);
-                    tn.x = clamp(SRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 2])), 0.0f, 1.0f);
+                    tn.z = clamp(sRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 0])), 0.0f, 1.0f);
+                    tn.y = clamp(sRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 1])), 0.0f, 1.0f);
+                    tn.x = clamp(sRGBToLinear(oneBy255 * (float)(normalMapData[texIdx * 4 + 2])), 0.0f, 1.0f);
                 } break;
                 default: 
                     logError("Can't generate LEAN map. Unsupported normal map format.");

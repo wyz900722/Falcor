@@ -30,6 +30,7 @@
 #import "HostDeviceData.h"
 __import DefaultVS;
 __import Lights;
+__exported __import ShaderCommon;
 
 /** This struct desribes the geometric data for a specific hit point used for lighting calculations 
 */

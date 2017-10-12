@@ -26,7 +26,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
 __import Shading;
-__import ShaderCommon;
 
 cbuffer PerFrameCB : register(b0)
 {
@@ -45,7 +44,7 @@ float4 main(VertexOut vOut) : SV_TARGET
     else
     {
         HitPointData hitPt = prepareHitPointData(vOut, gMaterial, gCam.position);
-        ShadingResult sr = evalMaterial(hitPt, gMaterial, gDirLight, 1);
+        ShadingResult sr = evalMaterial(hitPt, gMaterial, gPointLight, 1);
         float4 finalColor = float4(sr.finalResult, 1);
         return finalColor;
     }

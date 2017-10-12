@@ -153,11 +153,11 @@ namespace Falcor
         // Ordering matters here, we want that while developing, resources will be loaded from the development media directory
         std::string(getWorkingDirectory()),
         std::string(getWorkingDirectory() + "\\data"),
+        std::string(getExecutableDirectory() + "\\..\\..\\..\\Framework\\Source\\ShadingUtils"), // Falcor internal shaders directory
         std::string(getExecutableDirectory()),
         std::string(getExecutableDirectory() + "\\data"),
 
-        // The local solution media folder
-        std::string(getExecutableDirectory() + "\\..\\..\\..\\Media"),
+        std::string(getExecutableDirectory() + "\\..\\..\\..\\Media"), // The local solution media folder
     };
 
     const std::vector<std::string>& getDataDirectoriesList()

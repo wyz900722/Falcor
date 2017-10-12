@@ -27,6 +27,7 @@
 ***************************************************************************/
 __import DefaultVS;
 __import ShaderCommon;
+__import Shading;
 
 cbuffer PerFrameCB : register(b0)
 {
@@ -44,8 +45,8 @@ float4 main(VertexOut vOut) : SV_TARGET
     }
     else
     {
-
-        float4 finalColor = gMaterial.textures.diffuse.Sample(gMaterial.samplerState, vOut.texC);
+        HitPointData hitPt = prepareHitPointData(vOut, gMaterial, gCam.position);
+        float4 finalColor = float4(hitPt.normal, 1);
         return finalColor;
     }
 }

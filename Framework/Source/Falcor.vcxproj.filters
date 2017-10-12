@@ -2218,18 +2218,6 @@
     <None Include="Data\DefaultVS.slang">
       <Filter>Data</Filter>
     </None>
-    <None Include="ShadingUtils\BSDFs.slang">
-      <Filter>ShadingUtils</Filter>
-    </None>
-    <None Include="ShadingUtils\Cameras.slang">
-      <Filter>ShadingUtils</Filter>
-    </None>
-    <None Include="ShadingUtils\Helpers.slang">
-      <Filter>ShadingUtils</Filter>
-    </None>
-    <None Include="ShadingUtils\Lights.slang">
-      <Filter>ShadingUtils</Filter>
-    </None>
     <None Include="ShadingUtils\Shading.slang">
       <Filter>ShadingUtils</Filter>
     </None>

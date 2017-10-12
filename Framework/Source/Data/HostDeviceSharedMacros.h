@@ -107,6 +107,90 @@
 #endif
 
 /*******************************************************************
+    Materials
+*******************************************************************/
+
+// Shading model
+#define ShadingModelSpecGloss 0
+
+// Channel type
+#define ChannelTypeUnused    0
+#define ChannelTypeConst     1
+#define ChannelTypeTexture   2
+
+// Normal map type
+#define NormalMapUnused     0
+#define NormalMapRGB        1
+#define NormalMapRG         2
+
+// Alpha mode
+#define AlphaModeOpaque      0
+#define AlphaModeTransparent 1
+#define AlphaModeMask        2
+
+// NDF type
+#define NdfGGX      0
+#define NdfBeckmann 1
+
+// Bit count
+#define SHADING_MODEL_BITS   (3)
+#define DIFFUSE_TYPE_BITS    (3)
+#define SPECULAR_TYPE_BITS   (3)
+#define EMISSIVE_TYPE_BITS   (3)
+#define NORMAL_MAP_BITS      (2)
+#define OCCLUSION_MAP_BITS   (1)
+#define REFLECTION_MAP_BITS  (1)
+#define LIGHT_MAP_BITS       (1)
+#define HEIGHT_MAP_BITS      (1)
+#define ALPHA_MODE_BITS      (2)
+#define DOUBLE_SIDED_BITS    (1)
+#define NDF_BITS             (3)
+
+// Offsets
+#define SHADING_MODEL_OFFSET (0)
+#define DIFFUSE_TYPE_OFFSET  (SHADING_MODEL_OFFSET + SHADING_MODEL_BITS)
+#define SPECULAR_TYPE_OFFSET (DIFFUSE_TYPE_OFFSET  + DIFFUSE_TYPE_BITS)
+#define EMISSIVE_TYPE_OFFSET (SPECULAR_TYPE_OFFSET + SPECULAR_TYPE_BITS)
+#define NORMAL_MAP_OFFSET    (EMISSIVE_TYPE_OFFSET + EMISSIVE_TYPE_BITS)
+#define OCCLUSION_MAP_OFFSET (NORMAL_MAP_OFFSET    + NORMAL_MAP_BITS)
+#define REFLECTION_MAP_OFFSET (OCCLUSION_MAP_OFFSET+ OCCLUSION_MAP_BITS)
+#define LIGHT_MAP_OFFSET     (REFLECTION_MAP_OFFSET+ REFLECTION_MAP_BITS)
+#define HEIGHT_MAP_OFFSET    (LIGHT_MAP_OFFSET     + LIGHT_MAP_BITS)
+#define ALPHA_MODE_OFFSET    (HEIGHT_MAP_OFFSET    + HEIGHT_MAP_BITS)
+#define DOUBLE_SIDED_OFFSET  (ALPHA_MODE_OFFSET    + ALPHA_MODE_BITS)
+#define NDF_OFFSET           (DOUBLE_SIDED_OFFSET  + DOUBLE_SIDED_BITS)
+
+// Extract bits
+#define EXTRACT_BITS(bits, offset, value) ((value >> offset) & ((1 << bits) - 1))
+#define EXTRACT_SHADING_MODEL(value)    EXTRACT_BITS(SHADING_MODEL_BITS,    SHADING_MODEL_OFFSET,   value)
+#define EXTRACT_DIFFUSE_TYPE(value)     EXTRACT_BITS(DIFFUSE_TYPE_BITS,     DIFFUSE_TYPE_OFFSET,    value)
+#define EXTRACT_SPECULAR_TYPE(value)    EXTRACT_BITS(SPECULAR_TYPE_BITS,    SPECULAR_TYPE_OFFSET,   value)
+#define EXTRACT_EMISSIVE_TYPE(value)    EXTRACT_BITS(EMISSIVE_TYPE_BITS,    EMISSIVE_TYPE_OFFSET,   value)
+#define EXTRACT_NORMAL_MAP_TYPE(value)  EXTRACT_BITS(NORMAL_MAP_BITS,       NORMAL_MAP_OFFSET,      value)
+#define EXTRACT_OCCLUSION_MAP(value)    EXTRACT_BITS(OCCLUSION_MAP_BITS,    OCCLUSION_MAP_OFFSET,   value)
+#define EXTRACT_REFLECTION_MAP (value)  EXTRACT_BITS(REFLECTION_MAP_BITS,   REFLECTION_MAP_OFFSET,  value)
+#define EXTRACT_LIGHT_MAP(value)        EXTRACT_BITS(LIGHT_MAP_BITS,        LIGHT_MAP_OFFSET,       value)  
+#define EXTRACT_HEIGHT_MAP(value)       EXTRACT_BITS(HEIGHT_MAP_BITS,       HEIGHT_MAP_OFFSET,      value)
+#define EXTRACT_ALPHA_MODE(value)       EXTRACT_BITS(ALPHA_MODE_BITS,       ALPHA_MODE_OFFSET,      value)
+#define EXTRACT_DOUBLE_SIDED(value)     EXTRACT_BITS(DOUBLE_SIDED_BITS,     DOUBLE_SIDED_OFFSET,    value)
+#define EXTRACT_NDF_TYPE(value)         EXTRACT_BITS(NDF_BITS,              NDF_OFFSET,             value)
+
+// Pack bits
+#define PACK_BITS(bits, offset, flags, value) (((value & ((1 << bits) - 1)) << offset) | (flags & (~(((1 << bits) - 1) << offset))))
+#define PACK_SHADING_MODEL(flags, value)    PACK_BITS(SHADING_MODEL_BITS,    SHADING_MODEL_OFFSET,   flags, value)
+#define PACK_DIFFUSE_TYPE(flags, value)     PACK_BITS(DIFFUSE_TYPE_BITS,     DIFFUSE_TYPE_OFFSET,    flags, value)
+#define PACK_SPECULAR_TYPE(flags, value)    PACK_BITS(SPECULAR_TYPE_BITS,    SPECULAR_TYPE_OFFSET,   flags, value)
+#define PACK_EMISSIVE_TYPE(flags, value)    PACK_BITS(EMISSIVE_TYPE_BITS,    EMISSIVE_TYPE_OFFSET,   flags, value)
+#define PACK_NORMAL_MAP_TYPE(flags, value)  PACK_BITS(NORMAL_MAP_BITS,       NORMAL_MAP_OFFSET,      flags, value)
+#define PACK_OCCLUSION_MAP(flags, value)    PACK_BITS(OCCLUSION_MAP_BITS,    OCCLUSION_MAP_OFFSET,   flags, value)
+#define PACK_REFLECTION_MAP(flags, value)   PACK_BITS(REFLECTION_MAP_BITS,   REFLECTION_MAP_OFFSET,  flags, value)
+#define PACK_LIGHT_MAP(flags, value)        PACK_BITS(LIGHT_MAP_BITS,        LIGHT_MAP_OFFSET,       flags, value)
+#define PACK_HEIGHT_MAP(flags, value)       PACK_BITS(HEIGHT_MAP_BITS,       HEIGHT_MAP_OFFSET,      flags, value)
+#define PACK_ALPHA_MODE(flags, value)       PACK_BITS(ALPHA_MODE_BITS,       ALPHA_MODE_OFFSET,      flags, value)
+#define PACK_DOUBLE_SIDED(flags, value)     PACK_BITS(DOUBLE_SIDED_BITS,     DOUBLE_SIDED_OFFSET,    flags, value)
+#define PACK_NDF_TYPE(flags, value)         PACK_BITS(NDF_BITS,              NDF_OFFSET,             flags, value)
+
+/*******************************************************************
                     Lights
 *******************************************************************/
 

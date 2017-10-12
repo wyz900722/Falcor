@@ -29,7 +29,7 @@
 
 __import ShaderCommon;
 
-struct VS_IN
+struct VertexIn
 {
     float4 pos         : POSITION;
 #ifdef HAS_NORMAL
@@ -58,7 +58,7 @@ struct VS_IN
 #define INTERPOLATION_MODE linear
 #endif
 
-struct VS_OUT
+struct VertexOut
 {
     INTERPOLATION_MODE float3 normalW    : NORMAL;
     INTERPOLATION_MODE float3 bitangentW : BITANGENT;
@@ -74,7 +74,7 @@ struct VS_OUT
 #endif
 };
 
-float4x4 getWorldMat(VS_IN vIn)
+float4x4 getWorldMat(VertexIn vIn)
 {
 #ifdef _VERTEX_BLENDING
     float4x4 worldMat = getBlendedWorldMat(vIn.boneWeights, vIn.boneIds);
@@ -84,7 +84,7 @@ float4x4 getWorldMat(VS_IN vIn)
     return worldMat;
 }
 
-float3x3 getWorldInvTransposeMat(VS_IN vIn)
+float3x3 getWorldInvTransposeMat(VertexIn vIn)
 {
 #ifdef _VERTEX_BLENDING
     float3x3 worldInvTransposeMat = getBlendedInvTransposeWorldMat(vIn.boneWeights, vIn.boneIds);
@@ -94,9 +94,9 @@ float3x3 getWorldInvTransposeMat(VS_IN vIn)
     return worldInvTransposeMat;
 }
 
-VS_OUT defaultVS(VS_IN vIn)
+VertexOut defaultVS(VertexIn vIn)
 {
-    VS_OUT vOut;
+    VertexOut vOut;
     float4x4 worldMat = getWorldMat(vIn);
     float4 posW = mul(vIn.pos, worldMat);
     vOut.posW = posW.xyz;

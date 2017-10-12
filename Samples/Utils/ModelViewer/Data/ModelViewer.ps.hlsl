@@ -36,7 +36,7 @@ cbuffer PerFrameCB : register(b0)
     float3 gAmbient;
 };
 
-float4 main(VS_OUT vOut) : SV_TARGET
+float4 main(VertexOut vOut) : SV_TARGET
 {
     if(gConstColor)
     {

@@ -28,13 +28,29 @@
 #ifndef _FALCOR_LIGHTS_SLANG_
 #define _FALCOR_LIGHTS_SLANG_
 #include "HostDeviceData.h"
+__import ShaderCommon;
 
 struct LightSample
 {
     float3 intensity;   // The light intensity at the hit point
-    float3 dirW;        // The direction from the surface to the light source
+    float3 L;           // The direction from the surface to the light source
     float3 posW;        // The world-space position of the light 
+    float NdotH;
+    float NdotL;
 };
+
+void calcCommonLightProperties(HitPoint hitPt, inout LightSample ls)
+{
+    float3 H = normalize(hitPt.V + ls.L);
+    ls.NdotH = dot(hitPt.N, H);
+    ls.NdotL = dot(hitPt.N, ls.L);
+};
+
+float getDistanceFalloff(float distSquared)
+{
+    float falloff = 1 / ((0.01 * 0.01) + distSquared); // The 0.01 is to avoid infs when the light source is close to the shading point
+    return falloff;
+}
 
 /** Evaluate a directional light source intensity/direction at a shading point
 */
@@ -42,7 +58,7 @@ LightSample evalDirectionalLight(in LightData light, in float3 hitPosW)
 {
     LightSample ls;
     ls.intensity = light.intensity;
-    ls.dirW = -normalize(light.dirW);
+    ls.L = -normalize(light.dirW);
     float dist = length(hitPosW - light.posW);
     ls.posW = hitPosW - light.dirW * dist;
     return ls;
@@ -54,15 +70,16 @@ LightSample evalPointLight(in LightData light, in float3 hitPosW)
 {
     LightSample ls;
     ls.posW = light.posW;
-    ls.dirW = light.posW - hitPosW;
+    ls.L = light.posW - hitPosW;
     // Avoid NaN
-    float distance2 = dot(ls.dirW, ls.dirW);
-    ls.dirW = (distance2 > 1e-5f) ? normalize(ls.dirW) : 0;
+    float distSquared = dot(ls.L, ls.L);
+    ls.L = (distSquared > 1e-5f) ? normalize(ls.L) : 0;
 
     // Calculate the falloff
-    float falloff = 1 / (1 + distance2); // The 1 is to avoid infs when the light source is close to the shading point
+    float falloff = getDistanceFalloff(distSquared);
+
     // Calculate the falloff for spot-lights
-    float cosTheta = -dot(ls.dirW, light.dirW); // cos of angle of light orientation
+    float cosTheta = -dot(ls.L, light.dirW); // cos of angle of light orientation
     if(cosTheta < light.cosOpeningAngle)
     {
         falloff = 0;
@@ -82,25 +99,28 @@ LightSample evalAreaLight(in LightData light, in float3 hitPosW)
 {
     LightSample ls;
     ls.posW = mul(float4(light.posW, 1.0), light.transMat).xyz;
-    ls.dirW = light.posW - hitPosW;
-    float distance2 = dot(ls.dirW, ls.dirW);
-    ls.dirW = (distance2 > 1e-5f) ? normalize(ls.dirW) : 0;
+    ls.L = light.posW - hitPosW;
+    float distSquared = dot(ls.L, ls.L);
+    ls.L = (distSquared > 1e-5f) ? normalize(ls.L) : 0;
 
     // Calculate the falloff
-    float cosTheta = -dot(ls.dirW, light.dirW); // cos of angle of light orientation 
+    float cosTheta = -dot(ls.L, light.dirW); // cos of angle of light orientation 
     float falloff = max(0.f, cosTheta) * light.surfaceArea;
-    falloff *= 1 / (1 + distance2); // The 1 is to avoid infs when the light source is close to the shading point
+    falloff *= getDistanceFalloff(distSquared);
     ls.intensity = falloff * light.intensity;
     return ls;
 }
 
 /** Evaluate a light source intensity/direction at a shading point
 */
-LightSample evalLight(in LightData light, in float3 hitPosW)
+LightSample evalLight(LightData light, HitPoint hitPt)
 {
-    if(light.type == LightDirectional) return evalDirectionalLight(light, hitPosW);
-    else if(light.type == LightPoint)  return evalPointLight(light, hitPosW);
-    else return evalAreaLight(light, hitPosW);
+    LightSample ls;
+    if(light.type == LightDirectional) ls = evalDirectionalLight(light, hitPt.posW);
+    else if(light.type == LightPoint)  ls = evalPointLight(light, hitPt.posW);
+    else ls = evalAreaLight(light, hitPt.posW);
+    calcCommonLightProperties(hitPt, ls);
+    return ls;
 };
 
 #endif	// _FALCOR_LIGHTS_SLANG_

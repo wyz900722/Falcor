@@ -29,29 +29,8 @@
 #define _FALCOR_SHADING_SLANG_
 #import "HostDeviceData.h"
 __import DefaultVS;
-__import Lights;
 __exported __import ShaderCommon;
-
-/** This struct desribes the geometric data for a specific hit point used for lighting calculations 
-*/
-struct HitPointData
-{
-    float3    posW;         ///< Shading hit position in world space
-    float3    toEye;        ///< Direction to the eye at shading hit
-    float3    normal;       ///< Shading normal at shading hit
-    float3    tangent;      ///< Shading tangent at shading hit
-    float3    bitangent;    ///< Shading bitangent at shading hit
-    float2    uv;           ///< Texture mapping coordinates
-
-    // Pre-loaded texture data
-    float4 diffuse;
-    float4 specular;
-    float4 emissive;
-    float4 occlusion;
-    float4 reflection;
-    float4 bakedLight;
-    float4 height;
-};
+__import Lights;
 
 /** Load data from a texture
 */
@@ -93,7 +72,7 @@ float3 RgToNormal(float2 rg)
 
 /** Apply normal map
 */
-void applyNormalMap(in MaterialData m, inout HitPointData hitPt)
+void applyNormalMap(MaterialData m, inout HitPoint hitPt)
 {
     uint mapType = EXTRACT_NORMAL_MAP_TYPE(m.flags);
     if(mapType == NormalMapUnused) return;
@@ -112,9 +91,9 @@ void applyNormalMap(in MaterialData m, inout HitPointData hitPt)
     }
 
     // Apply the transformation. Everything is normalized already
-    hitPt.normal = hitPt.tangent * mapN.x + hitPt.bitangent * mapN.y + hitPt.normal * mapN.z;
-    hitPt.bitangent = normalize(hitPt.bitangent - hitPt.normal * dot(hitPt.bitangent, hitPt.normal));
-    hitPt.tangent = normalize(cross(hitPt.bitangent, hitPt.normal));
+    hitPt.N = hitPt.T * mapN.x + hitPt.B * mapN.y + hitPt.N * mapN.z;
+    hitPt.B = normalize(hitPt.B - hitPt.N * dot(hitPt.B, hitPt.N));
+    hitPt.T = normalize(cross(hitPt.B, hitPt.N));
 }
 
 /** Apply alpha-test
@@ -129,19 +108,19 @@ void applyAlphaTest(MaterialData m, float alpha)
 
 /** Prepare the hit-point data
 */
-HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 camPosW)
+HitPoint prepareHitPoint(VertexOut v, MaterialData m, float3 camPosW)
 {
-    HitPointData hitPt;
+    HitPoint hitPt;
     // Sample the diffuse texture and apply the alpha test
     hitPt.diffuse = sampleTexture(m.textures.diffuse, m.samplerState, v.texC, m.diffuse, EXTRACT_DIFFUSE_TYPE(m.flags));
     applyAlphaTest(m, hitPt.diffuse.a);
 
     hitPt.posW = v.posW;
     hitPt.uv = v.texC;
-    hitPt.toEye     = normalize(camPosW - v.posW);
-    hitPt.normal    = normalize(v.normalW);
-    hitPt.bitangent = normalize(v.bitangentW - hitPt.normal * (dot(v.bitangentW, hitPt.normal)));
-    hitPt.tangent   = normalize(cross(hitPt.bitangent, hitPt.normal));
+    hitPt.V = normalize(camPosW - v.posW);
+    hitPt.N = normalize(v.normalW);
+    hitPt.B = normalize(v.bitangentW - hitPt.N * (dot(v.bitangentW, hitPt.N)));
+    hitPt.T = normalize(cross(hitPt.B, hitPt.N));
 
     // Sample the rest of the texture
     hitPt.specular = sampleTexture(m.textures.specular, m.samplerState, v.texC, m.specular, EXTRACT_SPECULAR_TYPE(m.flags));
@@ -155,33 +134,33 @@ HitPointData prepareHitPointData(in VertexOut v, in MaterialData m, in float3 ca
     hitPt.height.xy = hitPt.height.xy * m.heightScaleOffset.x + m.heightScaleOffset.y;
 #undef channel_type
 
+    hitPt.NdotV = 0; // Need to initialize it otherwise the compiler complaines about uninitialized variable when calling applyNormalMap()
     applyNormalMap(m, hitPt);
+    hitPt.NdotV = dot(hitPt.N, hitPt.V);
 
     return hitPt;
 }
 
 /** Shading routines
 */
-
-float3 evalDiffuse(in HitPointData hitPt, in MaterialData mat, in LightSample ls)
+float3 evalDiffuse(HitPoint hitPt, MaterialData mat, LightSample ls)
 {
-    float ndotl = dot(ls.dirW, hitPt.normal);
-    ndotl = EXTRACT_DOUBLE_SIDED(mat.flags) ? abs(ndotl) : saturate(ndotl);
-    float3 albedo = mat.textures.diffuse.Sample(mat.samplerState, hitPt.uv).rgb;
-    albedo *= (1 / M_PI);
-    albedo *= ndotl * ls.intensity;
-    return albedo;
+    // Lambertian diffuse
+    float ndotl = ls.NdotL;
+    ndotl = EXTRACT_DOUBLE_SIDED(mat.flags) ? abs(ndotl) : max(0, ndotl);
+    return ndotl * ls.intensity;
 }
 
-ShadingResult evalMaterial(in HitPointData hitPt, in MaterialData mat, in LightData light, in float shadowFactor)
+ShadingResult evalMaterial(HitPoint hitPt, MaterialData mat, LightData light, float shadowFactor)
 {
+    LightSample ls = evalLight(light, hitPt);
+
     ShadingResult sr;
-    sr.diffuseIllumination = 0;
+    sr.diffuseIllumination = evalDiffuse(hitPt, mat, ls);
+    sr.color = hitPt.diffuse.rgb * sr.diffuseIllumination * (1 / M_PI);
+
     sr.specularIllumination = 0;
-    LightSample ls = evalLight(light, hitPt.posW);
-
-    sr.color = evalDiffuse(hitPt, mat, ls);
-
+    
     return sr;
 };
 

@@ -49,7 +49,6 @@ namespace Falcor
         using SharedPtr = std::shared_ptr<Light>;
         using SharedConstPtr = std::shared_ptr<const Light>;
 
-        Light() = default;
         virtual ~Light() = default;
 
         /** Set the light parameters into a program. To use this you need to include/import 'ShaderCommon' inside your shader.
@@ -78,15 +77,31 @@ namespace Falcor
         */
         virtual void unloadGPUData() = 0;
 
+        /** Set intensity of the light. Units are in lumens for point and spot lights. Otherwise it is just a brightness multiplier.
+        */
+        virtual void setIntensity(float intensity) { mIntensity = intensity; updateLightColor(); }
+
+        /** Set the modulation color of the light.
+        */
+        virtual void setColor(const vec3& color) { mColor = color; updateLightColor(); }
+
+        /** Set the light direction
+        */
+        void setDirection(const vec3& dir) { mData.dirW = dir; }
+
+        /** Get the light's world-space direction
+        */
+        const vec3& getDirection() const { return mData.dirW; }
+
         /** Get total light power
         */
-        virtual float getPower() = 0;
+        //virtual float getPower() = 0;
 
         /** Get the light type
         */
         uint32_t getType() const { return mData.type; }
 
-        /** Get the light Type
+        /** Get light data
         */
         inline const LightData& getData() const { return mData; }
 
@@ -103,22 +118,19 @@ namespace Falcor
         static uint32_t getShaderStructSize() { return kDataSize; }
 
     protected:
-
-        static const size_t kDataSize = sizeof(LightData); //TODO(tfoley) HACK:SPIRE - sizeof(MaterialData);
-
-        /* UI callbacks for keeping the intensity in-sync */
-        glm::vec3 getColorForUI();
-        void setColorFromUI(const glm::vec3& uiColor);
-        float getIntensityForUI();
-        void setIntensityFromUI(float intensity);
+        Light() = default;
 
         std::string mName;
+        vec3 mColor = vec3(1.0f);
+        float mIntensity = 1.0f;
 
-        /* These two variables track mData values for consistent UI operation.*/
-        glm::vec3 mUiLightIntensityColor = glm::vec3(0.5f, 0.5f, 0.5f);
-        float     mUiLightIntensityScale = 1.0f;
+        static const size_t kDataSize = sizeof(LightData); //TODO(tfoley) HACK:SPIRE - sizeof(MaterialData);
         LightData mData;
+
+    private:
+        void updateLightColor() { mData.lightColor = mColor * mIntensity; }
     };
+
 
     /** Directional light source.
     */
@@ -130,57 +142,30 @@ namespace Falcor
 
         static SharedPtr create();
 
-        DirectionalLight();
-        ~DirectionalLight();
+        ~DirectionalLight() = default;
 
         /** Render UI elements for this light.
-        \param[in] pGui The GUI to create the elements with
-        \param[in] group Optional. If specified, creates a UI group to display elements within
+            \param[in] pGui The GUI to create the elements with
+            \param[in] group Optional. If specified, creates a UI group to display elements within
         */
         void renderUI(Gui* pGui, const char* group = nullptr) override;
 
         /** Prepare GPU data
         */
-        void prepareGPUData() override;
+        void prepareGPUData() override {}
 
         /** Unload GPU data
         */
-        void unloadGPUData() override;
-
-        /** Set the light's world-space direction.
-        */
-        void setWorldDirection(const glm::vec3& dir);
-
-        /** Set the light intensity.
-            \param[in] intensity Vec3 corresponding to RGB intensity
-        */
-        void setIntensity(const glm::vec3& intensity) { mData.intensity = intensity; }
-
-        /** Set the scene parameters
-        */
-        void setWorldParams(const glm::vec3& center, float radius);
-
-        /** Get the light's world-space direction.
-        */
-        const glm::vec3& getWorldDirection() const { return mData.dirW; }
-
-        /** Get the light intensity.
-        */
-        const glm::vec3& getIntensity() const { return mData.intensity; }
-
-        /** Get total light power (needed for light picking)
-        */
-        float getPower() override;
+        void unloadGPUData() override {}
 
         /** IMovableObject interface
         */
-        void move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) override;
+        void move(const vec3& position, const vec3& target, const vec3& up) override;
 
     private:
-
-        float mDistance = 1e3f; ///< Scene bounding radius is required to move the light position sufficiently far away
-        vec3 mCenter;
+        DirectionalLight();
     };
+
 
     /** Simple infinitely-small point light with quadratic attenuation
     */
@@ -192,76 +177,103 @@ namespace Falcor
 
         static SharedPtr create();
 
+        ~PointLight() = default;
+
+        /** Prepare GPU data
+        */
+        void prepareGPUData() override {}
+
+        /** Unload GPU data
+        */
+        void unloadGPUData() override {}
+
+        /** Render UI elements for this light.
+            \param[in] pGui The GUI to create the elements with
+            \param[in] group Optional. If specified, creates a UI group to display elements within
+        */
+        virtual void renderUI(Gui* pGui, const char* group = nullptr);
+
+        /** Set radius of light's influence.
+        */
+        void setAttenuationRadius(float radius) { mData.attenuationRadius = radius; }
+
+        /** Set the light position
+        */
+        void setPosition(const vec3& pos) { mData.posW = pos; }
+
+        /** Set the up direction of the light's orientation. Used to determine orientation of tube lights.
+        */
+        void setUpVector(const vec3& up) { mData.upW = up; }
+
+        /** Set radius of light source shape. Used simulate sphere/tube lights.
+        */
+        void setSourceRadius(float radius) { mData.sourceRadius; }
+
+        /** Set length of light source shape. Used to simulate tube lights.
+        */
+        void setSourceLength(float length) { mData.sourceLength; }
+
+        /** Get the radius of the light's influence
+        */
+        float getAttenuationRadius() const { return mData.attenuationRadius; }
+
+        /** Get the light's world-space position
+        */
+        const vec3& getPosition() const { return mData.posW; }
+
+        /** Get the light's world-space up vector orientation
+        */
+        const vec3& getUpVector() const { return mData.upW; }
+
+        /** Get the light's source radius
+        */
+        float getSourceRadius() const { return mData.sourceRadius; }
+
+        /** Get the light's source length
+        */
+        float getSourceLength() const { return mData.sourceLength; }
+
+        /** IMovableObject interface
+        */
+        void move(const vec3& position, const vec3& target, const vec3& up) override;
+
+    protected:
         PointLight();
-        ~PointLight();
+    };
+
+    class SpotLight : public PointLight, public std::enable_shared_from_this<SpotLight>
+    {
+    public:
+        using SharedPtr = std::shared_ptr<SpotLight>;
+        using SharedConstPtr = std::shared_ptr<const SpotLight>;
+
+        static SharedPtr create();
+
+        ~SpotLight() = default;
 
         /** Render UI elements for this light.
             \param[in] pGui The GUI to create the elements with
             \param[in] group Optional. If specified, creates a UI group to display elements within
         */
         void renderUI(Gui* pGui, const char* group = nullptr) override;
-
-        /** Prepare GPU data
-        */
-        void prepareGPUData() override;
-
-        /** Unload GPU data
-        */
-        void unloadGPUData() override;
         
         /** Get total light power (needed for light picking)
         */
-        float getPower() override;
+        //float getPower() override;
 
-        /** Set the light's world-space position
+        /** Set angle of inner cone in degrees. Measured from center of cone to edge.
         */
-        void setWorldPosition(const glm::vec3& pos) { mData.posW = pos; }
+        void setInnerConeAngle(float angle);
 
-        /** Set the light's world-space position
+        /** Set angle of outer cone in degrees. Measured from center of cone to edge.
         */
-        void setWorldDirection(const glm::vec3& dir) { mData.dirW = dir; }
-
-        /** Set the light intensity.
-        */
-        void setIntensity(const glm::vec3& intensity) { mData.intensity = intensity; }
-
-        /** Set the cone opening angle for use as a spot light
-            \param[in] openingAngle Angle in radians.
-        */
-        void setOpeningAngle(float openingAngle);
-
-        /** Get the light's world-space position
-        */
-        const glm::vec3& getWorldPosition() const { return mData.posW; }
-
-        /** Get the light's world-space direction
-        */
-        const glm::vec3& getWorldDirection() const { return mData.dirW; }
-
-        /** Get the light intensity.
-        */
-        const glm::vec3& getIntensity() const { return mData.intensity; }
-
-        /** Get the penumbra angle
-        */
-        float getPenumbraAngle() const { return mData.penumbraAngle; }
-
-        /** Set the penumbra angle
-            \param[in] angle Angle in radians
-        */
-        void setPenumbraAngle(float angle) { mData.penumbraAngle = glm::clamp(angle, 0.0f, mData.openingAngle);; }
-
-        /** Get the opening angle
-        */
-        float getOpeningAngle() const { return mData.openingAngle; }
-
-        /** IMovableObject interface
-        */
-        void move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) override;
+        void setOuterConeAngle(float angle);
 
     private:
+        SpotLight();
     };
 
+#if 0
     /**
         Area light source
 
@@ -392,4 +404,6 @@ namespace Falcor
         vec3 mBitangent;             ///< Unnormalized bitangent vector of the light
         std::vector<float> mMeshCDF; ///< CDF function for importance sampling a triangle mesh
     };
+
+#endif // 0
 }

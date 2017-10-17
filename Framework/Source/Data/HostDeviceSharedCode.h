@@ -169,21 +169,25 @@ struct MaterialData
 */
 struct LightData
 {
-    float3   posW               DEFAULTS(float3(0, 0, 0));  ///< World-space position of the center of a light source
-    uint32_t type               DEFAULTS(LightPoint);       ///< Type of the light source (see above)
-    float3   dirW               DEFAULTS(float3(0, -1, 0)); ///< World-space orientation of the light source
-    float    openingAngle       DEFAULTS(3.14159265f);      ///< For point (spot) light: Opening angle of a spot light cut-off, pi by default - full-sphere point light
-    float3   intensity          DEFAULTS(float3(1, 1, 1));  ///< Emitted radiance of th light source
-    float    cosOpeningAngle    DEFAULTS(-1.f);             ///< For point (spot) light: cos(openingAngle), -1 by default because openingAngle is pi by default
-    float3   aabbMin            DEFAULTS(float3(1e20f));    ///< For area light: minimum corner of the AABB
-    float    penumbraAngle      DEFAULTS(0.f);              ///< For point (spot) light: Opening angle of penumbra region in radians, usually does not exceed openingAngle. 0.f by default, meaning a spot light with hard cut-off
-    float3   aabbMax            DEFAULTS(float3(-1e20f));   ///< For area light: maximum corner of the AABB
-    float    surfaceArea        DEFAULTS(0.f);              ///< Surface area of the geometry mesh
-	float3   tangent            DEFAULTS(float3());         ///< Tangent vector of the geometry mesh
-	uint32_t numIndices         DEFAULTS(0);                ///< Number of triangle indices in a polygonal area light
-	float3   bitangent          DEFAULTS(float3());         ///< BiTangent vector of the geometry mesh
-	float    pad;
-    float4x4 transMat           DEFAULTS(float4x4());       ///< Transformation matrix of the model instance for area lights
+    float3   posW                   DEFAULTS(float3(0, 0, 0));  ///< World-space position of the center of a light source
+    uint32_t type                   DEFAULTS(LightPoint);       ///< Type of the light source (see above)
+    float3   dirW                   DEFAULTS(float3(0, -1, 0)); ///< World-space orientation of the light source
+    float    cosOuterAngle          DEFAULTS(0.7071067f);       ///< For spot lights, cos(outerAngle) in radians. 45 degrees by default
+    float3   lightColor             DEFAULTS(float3(1, 1, 1));  ///< Emitted radiance of th light source
+    float    invCosConeDifference   DEFAULTS(1.f);              ///< For spot lights, 1 / (cosInnerCone - cosOuterCone). Default to 1 corresponding to 0 degree inner cone
+    float3   upW                    DEFAULTS(float3(0, 1, 0));  ///< For tube lights, up vector of the light's orientation
+    float    attenuationRadius      DEFAULTS(1.f);              ///< Radius of influence for point/spot lights
+    float    sourceRadius           DEFAULTS(0.0f);             ///< For point/spot lights, radius of source shape.
+    float    sourceLength           DEFAULTS(0.0f);             ///< For point/spot lights, length of source shape.
+
+    //float3   aabbMin            DEFAULTS(float3(1e20f));    ///< For area light: minimum corner of the AABB
+    //float3   aabbMax            DEFAULTS(float3(-1e20f));   ///< For area light: maximum corner of the AABB
+    //float    surfaceArea        DEFAULTS(0.f);              ///< Surface area of the geometry mesh
+    //float3   tangent            DEFAULTS(float3());         ///< Tangent vector of the geometry mesh
+    //uint32_t numIndices         DEFAULTS(0);                ///< Number of triangle indices in a polygonal area light
+    //float3   bitangent          DEFAULTS(float3());         ///< BiTangent vector of the geometry mesh
+    //float    pad;
+    //float4x4 transMat           DEFAULTS(float4x4());       ///< Transformation matrix of the model instance for area lights
 
     // For area light
 // 	BufPtr          indexPtr;                                     ///< Buffer id for indices

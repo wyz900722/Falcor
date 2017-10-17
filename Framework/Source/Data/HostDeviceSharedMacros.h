@@ -152,10 +152,11 @@
 /**
     Types of light sources. Used in LightData structure.
 */
-#define LightPoint           0    ///< Point light source, can be a spot light if its opening angle is < 2pi
-#define LightDirectional     1    ///< Directional light source
-#define LightArea            2    ///< Area light source, potentially with arbitrary geometry
-//#define LightVolume        3    ///< Volumetric light source
+#define LightPoint          0   ///< Point light source
+#define LightSpot           1   ///< Spot light source
+#define LightDirectional    2   ///< Directional light source
+#define LightArea           3   ///< Area light source, potentially with arbitrary geometry
+//#define LightVolume         4   ///< Volumetric light source
 
 #define MAX_LIGHT_SOURCES 16
 

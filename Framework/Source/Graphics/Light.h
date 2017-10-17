@@ -79,23 +79,27 @@ namespace Falcor
 
         /** Set intensity of the light. Units are in lumens for point and spot lights. Otherwise it is just a brightness multiplier.
         */
-        virtual void setIntensity(float intensity) { mIntensity = intensity; updateLightColor(); }
+        void setIntensity(float intensity) { mIntensity = intensity; updateLightColor(); }
 
         /** Set the modulation color of the light.
         */
-        virtual void setColor(const vec3& color) { mColor = color; updateLightColor(); }
+        void setColor(const vec3& color) { mColor = color; updateLightColor(); }
 
         /** Set the light direction
         */
         void setDirection(const vec3& dir) { mData.dirW = dir; }
 
+        /** Get the intensity of the light
+        */
+        float getIntensity() const { return mIntensity; }
+
+        /** Get the modulation color of the light
+        */
+        const vec3& getColor() const { return mColor; }
+
         /** Get the light's world-space direction
         */
         const vec3& getDirection() const { return mData.dirW; }
-
-        /** Get total light power
-        */
-        //virtual float getPower() = 0;
 
         /** Get the light type
         */
@@ -140,15 +144,11 @@ namespace Falcor
         using SharedPtr = std::shared_ptr<DirectionalLight>;
         using SharedConstPtr = std::shared_ptr<const DirectionalLight>;
 
+        /** Create a directional light
+        */
         static SharedPtr create();
 
-        ~DirectionalLight() = default;
-
-        /** Render UI elements for this light.
-            \param[in] pGui The GUI to create the elements with
-            \param[in] group Optional. If specified, creates a UI group to display elements within
-        */
-        void renderUI(Gui* pGui, const char* group = nullptr) override;
+        virtual ~DirectionalLight() = default;
 
         /** Prepare GPU data
         */
@@ -175,9 +175,11 @@ namespace Falcor
         using SharedPtr = std::shared_ptr<PointLight>;
         using SharedConstPtr = std::shared_ptr<const PointLight>;
 
+        /** Create a point light
+        */
         static SharedPtr create();
 
-        ~PointLight() = default;
+        virtual ~PointLight() = default;
 
         /** Prepare GPU data
         */
@@ -207,11 +209,11 @@ namespace Falcor
 
         /** Set radius of light source shape. Used simulate sphere/tube lights.
         */
-        void setSourceRadius(float radius) { mData.sourceRadius; }
+        void setSourceRadius(float radius) { mData.sourceRadius = radius; }
 
         /** Set length of light source shape. Used to simulate tube lights.
         */
-        void setSourceLength(float length) { mData.sourceLength; }
+        void setSourceLength(float length) { mData.sourceLength = length; }
 
         /** Get the radius of the light's influence
         */
@@ -247,30 +249,41 @@ namespace Falcor
         using SharedPtr = std::shared_ptr<SpotLight>;
         using SharedConstPtr = std::shared_ptr<const SpotLight>;
 
+        /** Create a spot light
+        */
         static SharedPtr create();
 
-        ~SpotLight() = default;
+        virtual ~SpotLight() = default;
 
         /** Render UI elements for this light.
             \param[in] pGui The GUI to create the elements with
             \param[in] group Optional. If specified, creates a UI group to display elements within
         */
         void renderUI(Gui* pGui, const char* group = nullptr) override;
-        
-        /** Get total light power (needed for light picking)
-        */
-        //float getPower() override;
 
-        /** Set angle of inner cone in degrees. Measured from center of cone to edge.
+        /** Set angle of inner cone in degrees. Measured from center of cone to edge
         */
         void setInnerConeAngle(float angle);
 
-        /** Set angle of outer cone in degrees. Measured from center of cone to edge.
+        /** Set angle of outer cone in degrees. Measured from center of cone to edge
         */
         void setOuterConeAngle(float angle);
 
+        /** Get the inner cone angle in degrees
+        */
+        float getInnerConeAngle() const { return mInnerConeAngle; }
+
+        /** Get the outer cone angle in degrees
+        */
+        float getOuterConeAngle() const { return mOuterConeAngle; }
+
     private:
         SpotLight();
+        void updateConeProperties();
+
+        // Angles in degrees
+        float mInnerConeAngle = 0.0f;
+        float mOuterConeAngle = 45.0f;
     };
 
 #if 0

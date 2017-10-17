@@ -84,99 +84,31 @@ namespace Falcor
 
         check_offset(dirW);
         check_offset(intensity);
-        check_offset(aabbMin);
-        check_offset(aabbMax);
-        check_offset(transMat);
-        check_offset(numIndices);
+        check_offset(cosOuterAngle);
+        check_offset(invCosConeDifference);
+        check_offset(attenuationRadius);
+        //check_offset(aabbMin);
+        //check_offset(aabbMax);
+        //check_offset(transMat);
+        //check_offset(numIndices);
 
         setIntoConstantBuffer(pBuffer, offset);
-    }
-
-    glm::vec3 Light::getColorForUI()
-    {
-        if ((mUiLightIntensityColor * mUiLightIntensityScale) != mData.intensity)
-        {
-            float mag = max(mData.intensity.x, max(mData.intensity.y, mData.intensity.z));
-            if (mag <= 1.f)
-            {
-                mUiLightIntensityColor = mData.intensity;
-                mUiLightIntensityScale = 1.0f;
-            }
-            else
-            {
-                mUiLightIntensityColor = mData.intensity / mag;
-                mUiLightIntensityScale = mag;
-            }
-        }
-
-        return mUiLightIntensityColor;
-    }
-
-    void updateAreaLightIntensity(LightData& light)
-    {
-        // Update material
-        if (light.type == LightArea)
-        {
-//            for (int i = 0; i < MatMaxLayers; ++i)
-            {
-                /*TODO(tfoley) HACK:SPIRE
-                if (light.material.desc.layers[i].type == MatEmissive)
-                {
-                    light.material.values.layers[i].albedo = v4(light.intensity, 0.f);
-                }
-                */
-            }
-        }
-    }
-
-    void Light::setColorFromUI(const glm::vec3& uiColor)
-    {
-        mUiLightIntensityColor = uiColor;
-        mData.intensity = (mUiLightIntensityColor * mUiLightIntensityScale);
-        updateAreaLightIntensity(mData);
-    }
-
-    float Light::getIntensityForUI()
-    {
-        if ((mUiLightIntensityColor * mUiLightIntensityScale) != mData.intensity)
-        {
-            float mag = max(mData.intensity.x, max(mData.intensity.y, mData.intensity.z));
-            if (mag <= 1.f)
-            {
-                mUiLightIntensityColor = mData.intensity;
-                mUiLightIntensityScale = 1.0f;
-            }
-            else
-            {
-                mUiLightIntensityColor = mData.intensity / mag;
-                mUiLightIntensityScale = mag;
-            }
-        }
-
-        return mUiLightIntensityScale;
-    }
-
-    void Light::setIntensityFromUI(float intensity)
-    {
-        mUiLightIntensityScale = intensity;
-        mData.intensity = (mUiLightIntensityColor * mUiLightIntensityScale);
-        updateAreaLightIntensity(mData);
     }
 
     void Light::renderUI(Gui* pGui, const char* group)
     {
         if(!group || pGui->beginGroup(group))
         {
-            glm::vec3 color = getColorForUI();
-            if (pGui->addRgbColor("Color", color))
+            if (pGui->addRgbColor("Color", mColor))
             {
-                setColorFromUI(color);
+                updateLightColor();
             }
-            float intensity = getIntensityForUI();
-            if (pGui->addFloatVar("Intensity", intensity))
+            if (pGui->addFloatVar("Intensity", mIntensity))
             {
-                setIntensityFromUI(intensity);
+                updateLightColor();
             }
+
+            pGui->addFloat3Var("Direction", mData.dirW);
 
             if (group)
             {
@@ -185,101 +117,41 @@ namespace Falcor
         }
     }
 
-	DirectionalLight::DirectionalLight() : mDistance(-1.0f)
+
+    DirectionalLight::DirectionalLight()
     {
         mData.type = LightDirectional;
     }
 
     DirectionalLight::SharedPtr DirectionalLight::create()
     {
-        DirectionalLight* pLight = new DirectionalLight();
-        return SharedPtr(pLight);
+        return SharedPtr(new DirectionalLight());
     }
 
-    DirectionalLight::~DirectionalLight() = default;
-
-    void DirectionalLight::renderUI(Gui* pGui, const char* group)
-    {
-        if(!group || pGui->beginGroup(group))
-        {
-            if (pGui->addDirectionWidget("Direction", mData.dirW))
-            {
-                setWorldDirection(mData.dirW);
-            }
-            Light::renderUI(pGui);
-            if (group)
-            {
-                pGui->endGroup();
-            }
-        }
-    }
-
-    void DirectionalLight::setWorldDirection(const glm::vec3& dir)
-    {
-        mData.dirW = normalize(dir);
-        mData.posW = mCenter - mData.dirW * mDistance; // Move light's position sufficiently far away
-    }
-
-    void DirectionalLight::setWorldParams(const glm::vec3& center, float radius)
-    {
-        mDistance = radius;
-        mCenter = center;
-        mData.posW = mCenter - mData.dirW * mDistance; // Move light's position sufficiently far away
-    }
-
-    void DirectionalLight::prepareGPUData()
-    {
-    }
-
-    void DirectionalLight::unloadGPUData()
-    {
-    }
-
-    float DirectionalLight::getPower()
-    {
-        const float surfaceArea = (float)M_PI * mDistance * mDistance;
-        return luminance(mData.intensity) * surfaceArea;
-    }
-
-    void DirectionalLight::move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
+    void DirectionalLight::move(const vec3& position, const vec3& target, const vec3& up)
     {
         logError("DirectionalLight::move() is not used and thus not implemented for now.");
     }
 
-    PointLight::SharedPtr PointLight::create()
-    {
-        PointLight* pLight = new PointLight;
-        return SharedPtr(pLight);
-    }
 
     PointLight::PointLight()
     {
         mData.type = LightPoint;
     }
 
-    PointLight::~PointLight() = default;
-
-    float PointLight::getPower()
+    PointLight::SharedPtr PointLight::create()
     {
-        return luminance(mData.intensity) * 4.f * (float)M_PI;
+        return SharedPtr(new PointLight());
     }
 
     void PointLight::renderUI(Gui* pGui, const char* group)
     {
-        if(!group || pGui->beginGroup(group))
+        if (!group || pGui->beginGroup(group))
         {
-            pGui->addFloat3Var("World Position", mData.posW, -FLT_MAX, FLT_MAX);
-            pGui->addDirectionWidget("Direction", mData.dirW);
-
-            if (pGui->addFloatVar("Opening Angle", mData.openingAngle, 0.f, (float)M_PI))
-            {
-                setOpeningAngle(mData.openingAngle);
-            }
-            if (pGui->addFloatVar("Penumbra Width", mData.penumbraAngle, 0.f, (float)M_PI))
-            {
-                setPenumbraAngle(mData.penumbraAngle);
-            }
             Light::renderUI(pGui);
+
+            pGui->addFloatVar("Attenuation Radius", mData.attenuationRadius, 0.0f, FLT_MAX, 0.05f);
+            pGui->addFloat3Var("Position", mData.posW, -FLT_MAX, FLT_MAX);
 
             if (group)
             {
@@ -288,26 +160,85 @@ namespace Falcor
         }
     }
 
-    void PointLight::setOpeningAngle(float openingAngle)
-    {
-        openingAngle = glm::clamp(openingAngle, 0.f, (float)M_PI);
-        mData.openingAngle = openingAngle;
-        /* Prepare an auxiliary cosine of the opening angle to quickly check whether we're within the cone of a spot light */
-        mData.cosOpeningAngle = cos(openingAngle);
-    }
-
-    void PointLight::prepareGPUData()
-    {
-    }
-
-    void PointLight::unloadGPUData()
-    {
-    }
-
-    void PointLight::move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
+    void PointLight::move(const vec3& position, const vec3& target, const vec3& up)
     {
         mData.posW = position;
         mData.dirW = target - position;
+        mData.upW = up;
+    }
+
+
+    SpotLight::SharedPtr SpotLight::create()
+    {
+        return SharedPtr(new SpotLight());
+    }
+
+    SpotLight::SpotLight()
+    {
+        mData.type = LightSpot;
+    }
+
+    void SpotLight::renderUI(Gui* pGui, const char* group)
+    {
+        if (!group || pGui->beginGroup(group))
+        {
+            PointLight::renderUI(pGui);
+
+            if (pGui->addFloatVar("Inner Cone Angle", mInnerConeAngle, 0.0f, mOuterConeAngle, 0.01f))
+            {
+                setInnerConeAngle(mInnerConeAngle);
+            }
+
+            if (pGui->addFloatVar("Outer Cone Angle", mOuterConeAngle, 0.0f, 89.0f, 0.01f))
+            {
+                setOuterConeAngle(mOuterConeAngle);
+            }
+
+            if (group)
+            {
+                pGui->endGroup();
+            }
+        }
+    }
+
+    void SpotLight::setInnerConeAngle(float angle)
+    {
+        mInnerConeAngle = angle;
+        mOuterConeAngle = max(mOuterConeAngle, mInnerConeAngle);
+        updateConeProperties();
+    }
+
+    void SpotLight::setOuterConeAngle(float angle)
+    {
+        mOuterConeAngle = angle;
+        mInnerConeAngle = min(mInnerConeAngle, mOuterConeAngle);
+        updateConeProperties();
+    }
+
+    void SpotLight::updateConeProperties()
+    {
+        mData.cosOuterAngle = cos(radians(mOuterConeAngle));
+        float cosInnerAngle = cos(radians(mInnerConeAngle));
+        mData.invCosConeDifference = 1.0f / (cosInnerAngle - mData.cosOuterAngle);
+    }
+
+#if 0
+
+    void updateAreaLightIntensity(LightData& light)
+    {
+        // Update material
+        if (light.type == LightArea)
+        {
+            //            for (int i = 0; i < MatMaxLayers; ++i)
+            {
+                /*TODO(tfoley) HACK:SPIRE
+                if (light.material.desc.layers[i].type == MatEmissive)
+                {
+                light.material.values.layers[i].albedo = v4(light.intensity, 0.f);
+                }
+                */
+            }
+        }
     }
 
     AreaLight::SharedPtr AreaLight::create()
@@ -369,16 +300,16 @@ namespace Falcor
 // 			// Store the mesh CDF buffer id
 // 			mData.meshCDFPtr.ptr = mMeshCDFBuf->makeResident();
 // 		}
- 		mData.numIndices = uint32_t(mIndexBuf->getSize() / sizeof(glm::ivec3));
+        mData.numIndices = uint32_t(mIndexBuf->getSize() / sizeof(glm::ivec3));
  
- 		// Get the surface area of the geometry mesh
- 		mData.surfaceArea = mSurfaceArea;
+        // Get the surface area of the geometry mesh
+        mData.surfaceArea = mSurfaceArea;
  
-		mData.tangent = mTangent;
-		mData.bitangent = mBitangent;
+        mData.tangent = mTangent;
+        mData.bitangent = mBitangent;
 
- 		// Fetch the mesh instance transformation
- 		mData.transMat = mpMeshInstance->getTransformMatrix();
+        // Fetch the mesh instance transformation
+        mData.transMat = mpMeshInstance->getTransformMatrix();
 
 // 		// Copy the material data
 // 		const Material::SharedPtr& pMaterial = mMeshData.pMesh->getMaterial();
@@ -398,7 +329,7 @@ namespace Falcor
 
     void AreaLight::setMeshData(const Model::MeshInstance::SharedPtr& pMeshInstance)
 {
-		if (pMeshInstance && pMeshInstance != mpMeshInstance)
+        if (pMeshInstance && pMeshInstance != mpMeshInstance)
         {
             const auto& pMesh = pMeshInstance->getObject();
             assert(pMesh != nullptr);
@@ -440,7 +371,7 @@ namespace Falcor
             const auto& pMesh = mpMeshInstance->getObject();
             assert(pMesh != nullptr);
 
-			if (mpMeshInstance->getObject()->getPrimitiveCount() != 2 || mpMeshInstance->getObject()->getVertexCount() != 4)
+            if (mpMeshInstance->getObject()->getPrimitiveCount() != 2 || mpMeshInstance->getObject()->getVertexCount() != 4)
             {
                 logWarning("Only support sampling of rectangular light sources made of 2 triangles.");
                 return;
@@ -476,12 +407,12 @@ namespace Falcor
                 mMeshCDF[mMeshCDF.size() - 1] = 1.f;
             }
 
-			// Calculate basis tangent vectors and their lengths
-			ivec3 pId = indices[0];
-			const vec3 p0(vertices[pId.x]), p1(vertices[pId.y]), p2(vertices[pId.z]);
+            // Calculate basis tangent vectors and their lengths
+            ivec3 pId = indices[0];
+            const vec3 p0(vertices[pId.x]), p1(vertices[pId.y]), p2(vertices[pId.z]);
 
-			mTangent = p0 - p1;
-			mBitangent = p2 - p1;
+            mTangent = p0 - p1;
+            mBitangent = p2 - p1;
 
             // Create a CDF buffer
             mMeshCDFBuf.reset();
@@ -563,4 +494,5 @@ namespace Falcor
         vec3 stillUp = vec3(0, 1, 0);
         mpMeshInstance->move(position, stillTarget, stillUp);
     }
+#endif // 0 
 }

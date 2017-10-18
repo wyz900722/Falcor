@@ -221,7 +221,7 @@ namespace Falcor
         return result;
     }
 
-    void ObjectPath::attachObject(const IMovableObject::SharedPtr& pObject)
+    void ObjectPath::attachObject(const Transform::SharedPtr& pObject)
     {
         // Only attach the object if its not already found
         if(std::find(mpObjects.begin(), mpObjects.end(), pObject) == mpObjects.end())
@@ -230,7 +230,7 @@ namespace Falcor
         }
     }
 
-    void ObjectPath::detachObject(const IMovableObject::SharedPtr& pObject)
+    void ObjectPath::detachObject(const Transform::SharedPtr& pObject)
     {
         auto& it = std::find(mpObjects.begin(), mpObjects.end(), pObject);
         if(it != mpObjects.end())

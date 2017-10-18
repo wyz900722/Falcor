@@ -34,7 +34,7 @@
 #include "Data/HostDeviceData.h"
 #include "Utils/Gui.h"
 #include "Graphics/Model/Model.h"
-#include "Graphics/Paths/MovableObject.h"
+#include "Graphics/Transform.h"
 
 namespace Falcor
 {
@@ -43,7 +43,7 @@ namespace Falcor
 
     /** Base class for light sources. All light sources should inherit from this.
     */
-    class Light : public IMovableObject, std::enable_shared_from_this<Light>
+    class Light : public Transform, std::enable_shared_from_this<Light>
     {
     public:
         using SharedPtr = std::shared_ptr<Light>;

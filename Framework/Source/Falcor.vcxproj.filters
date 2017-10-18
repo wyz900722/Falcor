@@ -526,6 +526,9 @@
     <ClCompile Include="API\Window.cpp">
       <Filter>API</Filter>
     </ClCompile>
+    <ClCompile Include="Graphics\Transform.cpp">
+      <Filter>Graphics</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Graphics\Model\Animation.h">
@@ -635,9 +638,6 @@
     </ClInclude>
     <ClInclude Include="Data\HostDeviceData.h">
       <Filter>Data</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\Paths\MovableObject.h">
-      <Filter>Graphics\Paths</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\Paths\ObjectPath.h">
       <Filter>Graphics\Paths</Filter>
@@ -1637,6 +1637,9 @@
     </ClInclude>
     <ClInclude Include="API\D3D\D3D12\D3D12ApiData.h">
       <Filter>API\D3D\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\Transform.h">
+      <Filter>Graphics</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

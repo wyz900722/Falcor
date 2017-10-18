@@ -142,7 +142,7 @@ namespace Falcor
         void deletePath(Gui* pGui);
         void startPathEditor(Gui* pGui);
         void startPathEditor();
-        void setObjectPath(Gui* pGui, const IMovableObject::SharedPtr& pMovable, const std::string& objType);
+        void setObjectPath(Gui* pGui, const Transform::SharedPtr& pMovable, const std::string& objType);
 
         // Global functions
         void setAmbientIntensity(Gui* pGui);
@@ -283,7 +283,7 @@ namespace Falcor
         //
         void renderPath(RenderContext* pContext);
 
-        void detachObjectFromPaths(const IMovableObject::SharedPtr& pMovable);
+        void detachObjectFromPaths(const Transform::SharedPtr& pMovable);
 
         void addSelectedPathKeyframeModels();
         void removeSelectedPathKeyframeModels();
@@ -300,7 +300,7 @@ namespace Falcor
         bool mRenderAllPaths = false;
 
         PathEditor::UniquePtr mpPathEditor;
-        std::unordered_map<const IMovableObject*, ObjectPath::SharedPtr> mObjToPathMap;
+        std::unordered_map<const Transform*, ObjectPath::SharedPtr> mObjToPathMap;
 
         DebugDrawer::SharedPtr mpDebugDrawer;
 

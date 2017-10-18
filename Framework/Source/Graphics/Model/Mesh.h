@@ -34,7 +34,7 @@
 #include "API/RenderContext.h"
 #include "utils/AABB.h"
 #include "Graphics/Material/Material.h"
-#include "Graphics/Paths/MovableObject.h"
+#include "Graphics/Transform.h"
 
 namespace Falcor
 {

@@ -736,7 +736,7 @@ namespace Falcor
         mpDebugDrawer->render(pContext, mpEditorScene->getActiveCamera().get());
     }
 
-    void SceneEditor::detachObjectFromPaths(const IMovableObject::SharedPtr& pMovable)
+    void SceneEditor::detachObjectFromPaths(const Transform::SharedPtr& pMovable)
     {
         for (uint32_t i = 0; i < mpScene->getPathCount(); i++)
         {
@@ -1593,7 +1593,7 @@ namespace Falcor
         }
     }
 
-    void SceneEditor::setObjectPath(Gui* pGui, const IMovableObject::SharedPtr& pMovable, const std::string& objType)
+    void SceneEditor::setObjectPath(Gui* pGui, const Transform::SharedPtr& pMovable, const std::string& objType)
     {
         // Find what path this pMovable is set to, if any
         ObjectPath::SharedPtr pOldPath;

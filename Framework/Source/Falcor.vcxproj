@@ -571,6 +571,7 @@
     <ClCompile Include="Graphics\Scene\SceneRenderer.cpp" />
     <ClCompile Include="Graphics\Scene\SceneUtils.cpp" />
     <ClCompile Include="Graphics\TextureHelper.cpp" />
+    <ClCompile Include="Graphics\Transform.cpp" />
     <ClCompile Include="MultiRendererSample.cpp" />
     <ClCompile Include="Sample.cpp" />
     <ClCompile Include="SampleTest.cpp" />
@@ -1022,7 +1023,6 @@
     <ClInclude Include="Graphics\Model\ObjectInstance.h" />
     <ClInclude Include="Graphics\Model\Model.h" />
     <ClInclude Include="Graphics\Model\ModelRenderer.h" />
-    <ClInclude Include="Graphics\Paths\MovableObject.h" />
     <ClInclude Include="Graphics\Paths\ObjectPath.h" />
     <ClInclude Include="Graphics\Paths\PathEditor.h" />
     <ClInclude Include="Graphics\Program.h" />
@@ -1044,6 +1044,7 @@
     <ClInclude Include="Graphics\Scene\SceneRenderer.h" />
     <ClInclude Include="Graphics\Scene\SceneUtils.h" />
     <ClInclude Include="Graphics\TextureHelper.h" />
+    <ClInclude Include="Graphics\Transform.h" />
     <ClInclude Include="MultiRendererSample.h" />
     <ClInclude Include="Sample.h" />
     <ClInclude Include="SampleTest.h" />

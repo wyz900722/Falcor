@@ -1115,7 +1115,7 @@ namespace Falcor
         return false;
     }
 
-    IMovableObject::SharedPtr SceneImporter::getMovableObject(const std::string& type, const std::string& name) const
+    Transform::SharedPtr SceneImporter::getMovableObject(const std::string& type, const std::string& name) const
     {
         if (type == SceneKeys::kModelInstance)
         {

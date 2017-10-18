@@ -28,7 +28,7 @@
 #pragma once
 #include "glm/vec3.hpp"
 #include <vector>
-#include "Graphics/Paths/MovableObject.h"
+#include "Graphics/Transform.h"
 #include "Utils/Math/CubicSpline.h"
 
 namespace Falcor
@@ -82,11 +82,11 @@ namespace Falcor
 
         /** Attach a movable object to the path, such as models, cameras, and lights.
         */
-        void attachObject(const IMovableObject::SharedPtr& pObject);
+        void attachObject(const Transform::SharedPtr& pObject);
 
         /** Detach a movable object from the path.
         */
-        void detachObject(const IMovableObject::SharedPtr& pObject);
+        void detachObject(const Transform::SharedPtr& pObject);
 
         /** Detach all objects from the path.
         */
@@ -94,7 +94,7 @@ namespace Falcor
 
         /** Get an object attached to the path.
         */
-        const IMovableObject::SharedPtr& getAttachedObject(uint32_t i) const { return mpObjects[i]; }
+        const Transform::SharedPtr& getAttachedObject(uint32_t i) const { return mpObjects[i]; }
 
         /** Get the number of attached objects.
         */
@@ -186,7 +186,7 @@ namespace Falcor
         Frame cubicSplineInterpolation(uint32_t currentFrame, float t);
 
         std::vector<Frame> mKeyFrames;
-        std::vector<IMovableObject::SharedPtr> mpObjects;
+        std::vector<Transform::SharedPtr> mpObjects;
         std::string mName;
         bool mRepeatAnimation = false;
 

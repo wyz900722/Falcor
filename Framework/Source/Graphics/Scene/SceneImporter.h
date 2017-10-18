@@ -86,9 +86,9 @@ namespace Falcor
         Model::LoadFlags mModelLoadFlags;
         Scene::LoadFlags mSceneLoadFlags;
 
-        using ObjectMap = std::map<std::string, IMovableObject::SharedPtr>;
+        using ObjectMap = std::map<std::string, Transform::SharedPtr>;
         bool isNameDuplicate(const std::string& name, const ObjectMap& objectMap, const std::string& objectType) const;
-        IMovableObject::SharedPtr getMovableObject(const std::string& type, const std::string& name) const;
+        Transform::SharedPtr getMovableObject(const std::string& type, const std::string& name) const;
 
         ObjectMap mInstanceMap;
         ObjectMap mCameraMap;

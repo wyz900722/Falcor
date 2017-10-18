@@ -31,7 +31,7 @@
 #include "glm/mat4x4.hpp"
 #include "Data/HostDeviceData.h"
 #include <vector>
-#include "graphics/Paths/MovableObject.h"
+#include "Graphics/Transform.h"
 
 namespace Falcor
 {
@@ -40,7 +40,7 @@ namespace Falcor
 
     /** Camera class. Default transform matrices are interpreted as left eye transform during stereo rendering.
     */
-    class Camera : public IMovableObject, public std::enable_shared_from_this<Camera>
+    class Camera : public Transform, public std::enable_shared_from_this<Camera>
     {
     public:
         using SharedPtr = std::shared_ptr<Camera>;

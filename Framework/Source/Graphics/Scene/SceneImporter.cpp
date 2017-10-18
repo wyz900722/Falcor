@@ -36,6 +36,7 @@
 #include "glm/detail/func_trigonometric.hpp"
 #include "SceneExportImportCommon.h"
 #include "glm/gtx/euler_angles.hpp"
+#include "glm/gtc/epsilon.hpp"
 
 namespace Falcor
 {
@@ -277,149 +278,200 @@ namespace Falcor
         return true;
     }
 
-    bool SceneImporter::createDirLight(const rapidjson::Value& jsonLight)
+    bool SceneImporter::parseBaseLight(Light::SharedPtr& pLight, const rapidjson::Value& jsonLight)
     {
-        auto pDirLight = DirectionalLight::create();
-
-        for(auto& it = jsonLight.MemberBegin(); it != jsonLight.MemberEnd(); it++)
+        for (auto& it = jsonLight.MemberBegin(); it != jsonLight.MemberEnd(); it++)
         {
             std::string key(it->name.GetString());
             const auto& value = it->value;
-            if(key == SceneKeys::kName)
+
+            if (key == SceneKeys::kName)
             {
-                if(value.IsString() == false)
+                if (value.IsString() == false)
                 {
                     return error("Point light name should be a string");
                 }
                 std::string name = value.GetString();
-                if(name.find(' ') != std::string::npos)
+                if (name.find(' ') != std::string::npos)
                 {
                     return error("Point light name can't have spaces");
                 }
-                pDirLight->setName(name);
+                pLight->setName(name);
             }
-            else if(key == SceneKeys::kType)
+            else if (key == SceneKeys::kLightIntensity)
             {
-                // Don't care
+                // Version 1-2 : intensity magnitude was baked into RGB
+                if (mScene.getVersion() < 3)
+                {
+                    vec3 intensity;
+                    if (getFloatVec<3>(value, "Light intensity", &intensity[0]) == false)
+                    {
+                        return false;
+                    }
+                    pLight->setIntensity(length(intensity));
+                    pLight->setColor(normalize(intensity));
+                }
+                // Version 3 : Separate color modulation and scalar intensity
+                else
+                {
+                    if (value.IsDouble() == false)
+                    {
+                        return error("Light intensity should be a scalar in version 3");
+                    }
+                    pLight->setIntensity((float)value.GetDouble());
+                }
             }
-            else if(key == SceneKeys::kLightIntensity)
+            else if (key == SceneKeys::kLightDirection)
             {
-                glm::vec3 intensity;
-                if(getFloatVec<3>(value, "Directional light intensity", &intensity[0]) == false)
+                vec3 dir;
+                if (getFloatVec<3>(value, "Light direction", &dir[0]) == false)
                 {
                     return false;
                 }
-                pDirLight->setIntensity(intensity);
+                pLight->setDirection(dir);
             }
-            else if(key == SceneKeys::kLightDirection)
+            else if (key == SceneKeys::kLightColor)
             {
-                glm::vec3 direction;
-                if(getFloatVec<3>(value, "Directional light intensity", &direction[0]) == false)
+                vec3 color;
+                if (getFloatVec<3>(value, "Light color", &color[0]) == false)
                 {
                     return false;
                 }
-                pDirLight->setWorldDirection(direction);
-            }
-            else
-            {
-                return error("Invalid key found in directional light object. Key == " + key + ".");
+                pLight->setColor(color);
             }
         }
-        mScene.addLight(pDirLight);
+
         return true;
     }
 
-    bool SceneImporter::createPointLight(const rapidjson::Value& jsonLight)
+    bool SceneImporter::parseDirectionalLight(DirectionalLight::SharedPtr& pLight, const rapidjson::Value& jsonLight)
     {
-        auto pPointLight = PointLight::create();
+        // Currently nothing aside from what's in base light
+        return parseBaseLight(std::static_pointer_cast<Light>(pLight), jsonLight);
+    }
 
-        for(auto& it = jsonLight.MemberBegin(); it != jsonLight.MemberEnd(); it++)
-        {
-            std::string key(it->name.GetString());
-            const auto& value = it->value;
-            if(key == SceneKeys::kName)
-            {
-                if(value.IsString() == false)
-                {
-                    return error("Dir light name should be a string");
-                }
-                std::string name = value.GetString();
-                if(name.find(' ') != std::string::npos)
-                {
-                    return error("Dir light name can't have spaces");
-                }
-                pPointLight->setName(name);
-            }
-            else if(key == SceneKeys::kType)
-            {
-                // Don't care
-            }
-            else if(key == SceneKeys::kLightOpeningAngle)
-            {
-                if(value.IsNumber() == false)
-                {
-                    return error("Camera's FOV should be a number");
-                }
-                float angle = (float)value.GetDouble();
-                // Convert to radiance
-                angle = glm::radians(angle);
-                pPointLight->setOpeningAngle(angle);
-            }
-            else if(key == SceneKeys::kLightPenumbraAngle)
-            {
-                if(value.IsNumber() == false)
-                {
-                    return error("Camera's FOV should be a number");
-                }
-                float angle = (float)value.GetDouble();
-                // Convert to radiance
-                angle = glm::radians(angle);
-                pPointLight->setPenumbraAngle(angle);
-            }
-            else if(key == SceneKeys::kLightIntensity)
-            {
-                glm::vec3 intensity;
-                if(getFloatVec<3>(value, "Point light intensity", &intensity[0]) == false)
-                {
-                    return false;
-                }
-                pPointLight->setIntensity(intensity);
-            }
-            else if(key == SceneKeys::kLightPos)
-            {
-                glm::vec3 position;
-                if(getFloatVec<3>(value, "Point light position", &position[0]) == false)
-                {
-                    return false;
-                }
-                pPointLight->setWorldPosition(position);
-            }
-            else if(key == SceneKeys::kLightDirection)
-            {
-                glm::vec3 dir;
-                if(getFloatVec<3>(value, "Point light direction", &dir[0]) == false)
-                {
-                    return false;
-                }
-                pPointLight->setWorldDirection(dir);
-            }
-            else
-            {
-                return error("Invalid key found in point light object. Key == " + key + ".");
-            }
-        }
-
-        if (isNameDuplicate(pPointLight->getName(), mLightMap, "lights"))
+    bool SceneImporter::parsePointLight(PointLight::SharedPtr& pLight, const rapidjson::Value& jsonLight)
+    {
+        if (parseBaseLight(std::static_pointer_cast<Light>(pLight), jsonLight) == false)
         {
             return false;
         }
-        else
+
+        for (auto& it = jsonLight.MemberBegin(); it != jsonLight.MemberEnd(); it++)
         {
-            mLightMap[pPointLight->getName()] = pPointLight;
-            mScene.addLight(pPointLight);
+            std::string key(it->name.GetString());
+            const auto& value = it->value;
+
+            if (key == SceneKeys::kLightPos)
+            {
+                glm::vec3 position;
+                if (getFloatVec<3>(value, "Light position", &position[0]) == false)
+                {
+                    return false;
+                }
+                pLight->setPosition(position);
+            }
+            else if (key == SceneKeys::kLightAttenuation)
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Light attenuation radius must be a number.");
+                }
+                pLight->setAttenuationRadius((float)value.GetDouble());
+            }
+            // TODO: Fill in sphere/tube light data
         }
 
         return true;
+    }
+
+    bool SceneImporter::parseSpotLight(SpotLight::SharedPtr& pLight, const rapidjson::Value& jsonLight)
+    {
+        if (parsePointLight(std::static_pointer_cast<PointLight>(pLight), jsonLight) == false)
+        {
+            return false;
+        }
+
+        // Version 1-2 penumbra angle loads into here first, because it is dependent on opening angle to be loaded to calculate inner cone angle
+        float penumbraAngle = 0.0f;
+
+        for (auto& it = jsonLight.MemberBegin(); it != jsonLight.MemberEnd(); it++)
+        {
+            std::string key(it->name.GetString());
+            const auto& value = it->value;
+
+            if (key == SceneKeys::kLightOpeningAngle) // Version 1-2
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Spot light outer/opening cone angle should be a number.");
+                }
+                pLight->setOuterConeAngle((float)value.GetDouble());
+            }
+            else if (key == SceneKeys::kLightPenumbraAngle) // Version 1-2
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Spot light penumbra angle should be a number.");
+                }
+                penumbraAngle = (float)value.GetDouble();
+            }
+            else if (key == SceneKeys::kLightInnerAngle) // Version 3
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Spot light inner cone angle should be a number.");
+                }
+                pLight->setInnerConeAngle((float)value.GetDouble());
+            }
+            else if (key == SceneKeys::kLightOuterAngle) // Version 3
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Spot light outer cone angle should be a number.");
+                }
+                pLight->setOuterConeAngle((float)value.GetDouble());
+            }
+        }
+
+        if (mScene.getVersion() < 3)
+        {
+            pLight->setInnerConeAngle(pLight->getOuterConeAngle() - penumbraAngle);
+        }
+    }
+
+    // Determines if a version 1-2 "point light" is actually a spot light
+    bool isLegacyPointLightASpotLight(const rapidjson::Value& jsonLight)
+    {
+        for (auto& it = jsonLight.MemberBegin(); it != jsonLight.MemberEnd(); it++)
+        {
+            std::string key(it->name.GetString());
+            const auto& value = it->value;
+
+            if (value.IsDouble() == false)
+            {
+                continue;
+            }
+
+            if (key == SceneKeys::kLightOpeningAngle) // Version 1-2
+            {
+                // If opening angle isn't 180, it's a spot light
+                if (epsilonNotEqual((float)value.GetDouble(), 180.0f, epsilon<float>()))
+                {
+                    return true;
+                }
+            }
+            else if (key == SceneKeys::kLightPenumbraAngle) // Version 1-2
+            {
+                // If there's a penumbra angle, it's a spot light
+                if (epsilonNotEqual((float)value.GetDouble(), 0.0f, epsilon<float>()))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     bool SceneImporter::parseLights(const rapidjson::Value& jsonVal)
@@ -444,24 +496,34 @@ namespace Falcor
                 return error("Light source Type must be a string.");
             }
 
+            Light::SharedPtr pLight;
             std::string lightType(type->value.GetString());
-            bool b;
+            const bool isLegacySpotLight = mScene.getVersion() < 3 ? isLegacyPointLightASpotLight(light) : false;
+
             if(lightType == SceneKeys::kDirLight)
             {
-                b = createDirLight(light);
+                pLight = DirectionalLight::create();
+                parseDirectionalLight(std::static_pointer_cast<DirectionalLight>(pLight), light);
             }
-            else if(lightType == SceneKeys::kPointLight)
+            else if (lightType == SceneKeys::kSpotLight || isLegacySpotLight)
             {
-                b = createPointLight(light);
+                pLight = SpotLight::create();
+                parseSpotLight(std::static_pointer_cast<SpotLight>(pLight), light);
+            }
+            else if (lightType == SceneKeys::kPointLight)
+            {
+                pLight = PointLight::create();
+                parsePointLight(std::static_pointer_cast<PointLight>(pLight), light);
+            }
+
+            if (pLight == nullptr || isNameDuplicate(pLight->getName(), mLightMap, SceneKeys::kLight))
+            {
+                return false;
             }
             else
             {
-                return error("Unrecognized light Type \"" + lightType + "\"");
-            }
-
-            if(b == false)
-            {
-                return false;
+                mLightMap[pLight->getName()] = pLight;
+                mScene.addLight(pLight);
             }
         }
 

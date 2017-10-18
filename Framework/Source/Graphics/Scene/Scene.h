@@ -44,6 +44,7 @@ namespace Falcor
         using SharedPtr = std::shared_ptr<Scene>;
         using SharedConstPtr = std::shared_ptr<const Scene>;
         static const char* kFileFormatString;
+        static const uint32_t kCurrentVersion = 3;
 
         struct UserVariable
         {
@@ -211,7 +212,7 @@ namespace Falcor
         uint32_t mActiveCameraID = 0;
         float mCameraSpeed = 1;
         float mLightingScale = 1.0f;
-        uint32_t mVersion = 1;
+        uint32_t mVersion = kCurrentVersion;
 
         float mRadius = -1.f;
         vec3 mCenter = vec3(0, 0, 0);

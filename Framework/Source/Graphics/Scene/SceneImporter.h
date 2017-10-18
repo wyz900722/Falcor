@@ -65,11 +65,14 @@ namespace Falcor
 
         bool createModel(const rapidjson::Value& jsonModel);
         bool createModelInstances(const rapidjson::Value& jsonVal, const Model::SharedPtr& pModel);
-        bool createPointLight(const rapidjson::Value& jsonLight);
-        bool createDirLight(const rapidjson::Value& jsonLight);
         ObjectPath::SharedPtr createPath(const rapidjson::Value& jsonPath);
         bool createPathFrames(ObjectPath* pPath, const rapidjson::Value& jsonFramesArray);
         bool createCamera(const rapidjson::Value& jsonCamera);
+
+        bool parseBaseLight(Light::SharedPtr& pLight, const rapidjson::Value& jsonLight);
+        bool parseDirectionalLight(DirectionalLight::SharedPtr& pLight, const rapidjson::Value& jsonLight);
+        bool parsePointLight(PointLight::SharedPtr& pLight, const rapidjson::Value& jsonLight);
+        bool parseSpotLight(SpotLight::SharedPtr& pLight, const rapidjson::Value& jsonLight);
 
         bool error(const std::string& msg);
 

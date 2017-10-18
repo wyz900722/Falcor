@@ -65,11 +65,16 @@ namespace Falcor
         static const char* kType = "type";
         static const char* kDirLight = "dir_light";
         static const char* kPointLight = "point_light";
+        static const char* kSpotLight = "spot_light";
         static const char* kLightIntensity = "intensity";
+        static const char* kLightColor = "color";
+        static const char* kLightDirection = "direction";
+        static const char* kLightPos = "pos";
+        static const char* kLightAttenuation = "attenuation";
         static const char* kLightOpeningAngle = "opening_angle";
         static const char* kLightPenumbraAngle = "penumbra_angle";
-        static const char* kLightPos = "pos";
-        static const char* kLightDirection = "direction";
+        static const char* kLightInnerAngle = "inner_cone_angle";
+        static const char* kLightOuterAngle = "outer_cone_angle";
 
         static const char* kPaths = "paths";
         static const char* kActivePath = "active_path";

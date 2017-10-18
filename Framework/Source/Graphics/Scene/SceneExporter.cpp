@@ -100,7 +100,7 @@ namespace Falcor
         // Write the version
         rapidjson::Value& JVal = mJDoc;
         auto& allocator = mJDoc.GetAllocator();
-        addLiteral(JVal, allocator, SceneKeys::kVersion, kVersion);
+        addLiteral(JVal, allocator, SceneKeys::kVersion, Scene::kCurrentVersion);
 
         // Write everything else
         bool exportPaths = (exportOptions & ExportPaths) != 0;
@@ -204,23 +204,36 @@ namespace Falcor
         addJsonValue(mJDoc, mJDoc.GetAllocator(), SceneKeys::kModels, jsonModelArray);
     }
 
-    void createPointLightValue(const PointLight* pLight, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
+    void createBaseLightValue(const Light* pLight, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
     {
         addString(jsonLight, allocator, SceneKeys::kName, pLight->getName());
-        addString(jsonLight, allocator, SceneKeys::kType, SceneKeys::kPointLight);
         addVector(jsonLight, allocator, SceneKeys::kLightIntensity, pLight->getIntensity());
-        addVector(jsonLight, allocator, SceneKeys::kLightPos, pLight->getWorldPosition());
-        addVector(jsonLight, allocator, SceneKeys::kLightDirection, pLight->getWorldDirection());
-        addLiteral(jsonLight, allocator, SceneKeys::kLightOpeningAngle, glm::degrees(pLight->getOpeningAngle()));
-        addLiteral(jsonLight, allocator, SceneKeys::kLightPenumbraAngle, glm::degrees(pLight->getPenumbraAngle()));
+        addVector(jsonLight, allocator, SceneKeys::kLightColor, pLight->getColor());
+        addVector(jsonLight, allocator, SceneKeys::kLightDirection, pLight->getDirection());
     }
 
     void createDirectionalLightValue(const DirectionalLight* pLight, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
     {
-        addString(jsonLight, allocator, SceneKeys::kName, pLight->getName());
-        addString(jsonLight, allocator, SceneKeys::kType, SceneKeys::kDirLight);
-        addVector(jsonLight, allocator, SceneKeys::kLightIntensity, pLight->getIntensity());
-        addVector(jsonLight, allocator, SceneKeys::kLightDirection, pLight->getWorldDirection());
+        createBaseLightValue((Light*)pLight, allocator, jsonLight);
+    }
+
+    void createPointLightValue(const PointLight* pLight, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
+    {
+        createBaseLightValue((Light*)pLight, allocator, jsonLight);
+
+        // #TODO: Export transform when moving transforms to IMovableObject
+
+        addLiteral(jsonLight, allocator, SceneKeys::kLightAttenuation, pLight->getAttenuationRadius());
+        addLiteral(jsonLight, allocator, SceneKeys::kLightSourceRadius, pLight->getSourceRadius());
+        addLiteral(jsonLight, allocator, SceneKeys::kLightSourceLength, pLight->getSourceLength());
+
+    }
+
+    void createSpotLightValue(const SpotLight* pLight, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
+    {
+        createPointLightValue((PointLight*)pLight, allocator, jsonLight);
+        addLiteral(jsonLight, allocator, SceneKeys::kLightInnerAngle, pLight->getInnerConeAngle());
+        addLiteral(jsonLight, allocator, SceneKeys::kLightOuterAngle, pLight->getOuterConeAngle());
     }
 
     void createLightValue(const Scene::SharedPtr& pScene, uint32_t lightID, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
@@ -231,10 +244,16 @@ namespace Falcor
         switch (pLight->getType())
         {
         case LightPoint:
+            addString(jsonLight, allocator, SceneKeys::kType, SceneKeys::kPointLight);
             createPointLightValue((PointLight*)pLight.get(), allocator, jsonLight);
             break;
         case LightDirectional:
+            addString(jsonLight, allocator, SceneKeys::kType, SceneKeys::kDirLight);
             createDirectionalLightValue((DirectionalLight*)pLight.get(), allocator, jsonLight);
+            break;
+        case LightSpot:
+            addString(jsonLight, allocator, SceneKeys::kType, SceneKeys::kDirLight);
+            createSpotLightValue((SpotLight*)pLight.get(), allocator, jsonLight);
             break;
         default:
             should_not_get_here();

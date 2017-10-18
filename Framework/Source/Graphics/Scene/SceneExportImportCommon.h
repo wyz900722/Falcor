@@ -75,6 +75,8 @@ namespace Falcor
         static const char* kLightPenumbraAngle = "penumbra_angle";
         static const char* kLightInnerAngle = "inner_cone_angle";
         static const char* kLightOuterAngle = "outer_cone_angle";
+        static const char* kLightSourceRadius = "source_radius";
+        static const char* kLightSourceLength = "source_length";
 
         static const char* kPaths = "paths";
         static const char* kActivePath = "active_path";

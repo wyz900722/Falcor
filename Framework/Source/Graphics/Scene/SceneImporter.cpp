@@ -379,7 +379,22 @@ namespace Falcor
                 }
                 pLight->setAttenuationRadius((float)value.GetDouble());
             }
-            // TODO: Fill in sphere/tube light data
+            else if (key == SceneKeys::kLightSourceRadius)
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Light source radius must be a number.");
+                }
+                pLight->setSourceRadius((float)value.GetDouble());
+            }
+            else if (key == SceneKeys::kLightSourceLength)
+            {
+                if (value.IsDouble() == false)
+                {
+                    return error("Light source length must be a number.");
+                }
+                pLight->setSourceLength((float)value.GetDouble());
+            }
         }
 
         return true;

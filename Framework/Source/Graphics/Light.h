@@ -27,14 +27,14 @@
 ***************************************************************************/
 #pragma once
 #include <string>
-#include <glm/common.hpp>
-#include "glm/geometric.hpp"
-#include "API/Texture.h"
-#include "glm/mat4x4.hpp"
 #include "Data/HostDeviceData.h"
 #include "Utils/Gui.h"
-#include "Graphics/Model/Model.h"
 #include "Graphics/Transform.h"
+//#include <glm/common.hpp>
+//#include "API/Texture.h"
+//#include "glm/geometric.hpp"
+//#include "glm/mat4x4.hpp"
+//#include "Graphics/Model/Model.h"
 
 namespace Falcor
 {
@@ -43,11 +43,12 @@ namespace Falcor
 
     /** Base class for light sources. All light sources should inherit from this.
     */
-    class Light : public Transform, std::enable_shared_from_this<Light>
+    class Light : public Transform, public inherit_shared_from_this<Transform, Light>
     {
     public:
         using SharedPtr = std::shared_ptr<Light>;
         using SharedConstPtr = std::shared_ptr<const Light>;
+        using inherit_shared_from_this<Transform, Light>::shared_from_this;
 
         virtual ~Light() = default;
 
@@ -71,11 +72,11 @@ namespace Falcor
 
         /** Prepare GPU data
         */
-        virtual void prepareGPUData() = 0;
+        virtual void prepareGPUData() { mData.dirW = mBase.forward; }
 
         /** Unload GPU data
         */
-        virtual void unloadGPUData() = 0;
+        virtual void unloadGPUData() {}
 
         /** Set intensity of the light. Units are in lumens for point and spot lights. Otherwise it is just a brightness multiplier.
         */
@@ -87,7 +88,7 @@ namespace Falcor
 
         /** Set the light direction
         */
-        void setDirection(const vec3& dir) { mData.dirW = dir; }
+        void setDirection(const vec3& dir) { setForwardVector(dir); }
 
         /** Get the intensity of the light
         */
@@ -99,7 +100,7 @@ namespace Falcor
 
         /** Get the light's world-space direction
         */
-        const vec3& getDirection() const { return mData.dirW; }
+        const vec3& getDirection() const { return getForwardVector(); }
 
         /** Get the light type
         */
@@ -111,7 +112,7 @@ namespace Falcor
 
         /** Name the light
         */
-        const void setName(const std::string& Name) { mName = Name; }
+        const void setName(const std::string& name) { mName = name; }
 
         /** Get the light's name
         */
@@ -150,14 +151,6 @@ namespace Falcor
 
         virtual ~DirectionalLight() = default;
 
-        /** Prepare GPU data
-        */
-        void prepareGPUData() override {}
-
-        /** Unload GPU data
-        */
-        void unloadGPUData() override {}
-
         /** IMovableObject interface
         */
         void move(const vec3& position, const vec3& target, const vec3& up) override;
@@ -183,11 +176,11 @@ namespace Falcor
 
         /** Prepare GPU data
         */
-        void prepareGPUData() override {}
+        virtual void prepareGPUData() override;
 
         /** Unload GPU data
         */
-        void unloadGPUData() override {}
+        virtual void unloadGPUData() override {}
 
         /** Render UI elements for this light.
             \param[in] pGui The GUI to create the elements with
@@ -198,14 +191,6 @@ namespace Falcor
         /** Set radius of light's influence.
         */
         void setAttenuationRadius(float radius) { mData.attenuationRadius = radius; }
-
-        /** Set the light position
-        */
-        void setPosition(const vec3& pos) { mData.posW = pos; }
-
-        /** Set the up direction of the light's orientation. Used to determine orientation of tube lights.
-        */
-        void setUpVector(const vec3& up) { mData.upW = up; }
 
         /** Set radius of light source shape. Used simulate sphere/tube lights.
         */
@@ -219,14 +204,6 @@ namespace Falcor
         */
         float getAttenuationRadius() const { return mData.attenuationRadius; }
 
-        /** Get the light's world-space position
-        */
-        const vec3& getPosition() const { return mData.posW; }
-
-        /** Get the light's world-space up vector orientation
-        */
-        const vec3& getUpVector() const { return mData.upW; }
-
         /** Get the light's source radius
         */
         float getSourceRadius() const { return mData.sourceRadius; }
@@ -235,7 +212,7 @@ namespace Falcor
         */
         float getSourceLength() const { return mData.sourceLength; }
 
-        /** IMovableObject interface
+        /** Moves the light's 'base' transform
         */
         void move(const vec3& position, const vec3& target, const vec3& up) override;
 

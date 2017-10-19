@@ -83,7 +83,7 @@ namespace Falcor
         }
 
         check_offset(dirW);
-        check_offset(intensity);
+        check_offset(lightColor);
         check_offset(cosOuterAngle);
         check_offset(invCosConeDifference);
         check_offset(attenuationRadius);
@@ -108,7 +108,11 @@ namespace Falcor
                 updateLightColor();
             }
 
-            pGui->addFloat3Var("Direction", mData.dirW);
+            vec3 dir = getForwardVector();
+            if (pGui->addFloat3Var("Direction", dir))
+            {
+                setForwardVector(dir);
+            }
 
             if (group)
             {
@@ -116,7 +120,6 @@ namespace Falcor
             }
         }
     }
-
 
     DirectionalLight::DirectionalLight()
     {
@@ -144,6 +147,13 @@ namespace Falcor
         return SharedPtr(new PointLight());
     }
 
+    void PointLight::prepareGPUData()
+    {
+        Light::prepareGPUData(); // mData.dirW
+        mData.posW = mBase.position;
+        mData.upW = mBase.up;
+    }
+
     void PointLight::renderUI(Gui* pGui, const char* group)
     {
         if (!group || pGui->beginGroup(group))
@@ -151,7 +161,12 @@ namespace Falcor
             Light::renderUI(pGui);
 
             pGui->addFloatVar("Attenuation Radius", mData.attenuationRadius, 0.0f, FLT_MAX, 0.05f);
-            pGui->addFloat3Var("Position", mData.posW, -FLT_MAX, FLT_MAX);
+
+            vec3 pos = getPosition();
+            if (pGui->addFloat3Var("Position", pos, -FLT_MAX, FLT_MAX))
+            {
+                setPosition(pos, false);
+            }
 
             if (group)
             {
@@ -162,9 +177,9 @@ namespace Falcor
 
     void PointLight::move(const vec3& position, const vec3& target, const vec3& up)
     {
-        mData.posW = position;
-        mData.dirW = target - position;
-        mData.upW = up;
+        setPosition(position, false);
+        setTarget(target);
+        setUpVector(up);
     }
 
 

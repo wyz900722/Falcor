@@ -34,30 +34,30 @@
 
 namespace Falcor
 {
-    Transform::Transform(const vec3& translation, const vec3& target, const vec3& up, const vec3& scale)
+    Transform::Transform(const vec3& position, const vec3& target, const vec3& up, const vec3& scale)
     {
-        mBase.translation = translation;
+        mBase.position = position;
         mBase.target = target;
         mBase.up = up;
         mBase.scale = scale;
     }
 
-    Transform::Transform(const vec3& translation, const vec3& yawPitchRoll, const vec3& scale)
+    Transform::Transform(const vec3& position, const vec3& yawPitchRoll, const vec3& scale)
     {
-        mBase.translation = translation;
+        mBase.position = position;
         setRotation(yawPitchRoll);
         mBase.scale = scale;
     }
 
-    void Transform::setTranslation(const vec3& translation, bool translateLookAt)
+    void Transform::setPosition(const vec3& position, bool translateLookAt)
     {
         if (translateLookAt)
         {
-            vec3 toLookAt = mBase.target - mBase.translation;
-            mBase.target = translation + toLookAt;
+            vec3 toLookAt = mBase.target - mBase.position;
+            mBase.target = position + toLookAt;
         }
 
-        mBase.translation = translation;
+        mBase.position = position;
         mBase.matrixDirty = true;
     }
 
@@ -67,11 +67,11 @@ namespace Falcor
         const mat3 rotMtx(glm::yawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]));
 
         // Preserve distance of look-at target
-        const float targetDist = length(mBase.target - mBase.translation);
+        const float targetDist = length(mBase.target - mBase.position);
 
         // Get look-at info
         mBase.up = rotMtx[1];
-        mBase.target = mBase.translation + rotMtx[2] * targetDist; // position + forward
+        mBase.target = mBase.position + rotMtx[2] * targetDist; // position + forward
 
         mBase.matrixDirty = true;
     }
@@ -91,12 +91,20 @@ namespace Falcor
     void Transform::setTarget(const vec3& target)
     {
         mBase.target = target;
+        mBase.forward = normalize(mBase.target - mBase.position);
         mBase.matrixDirty = true;
+    }
+
+    void Transform::setForwardVector(const vec3& forward)
+    {
+        mBase.forward = normalize(forward);
+        float targetDist = length(mBase.target - mBase.position);
+        mBase.target = mBase.forward * targetDist;
     }
 
     vec3 Transform::getRotation() const
     {
-        mat4 rotationMtx = createMatrixFromLookAt(mBase.translation, mBase.target, mBase.up);
+        mat4 rotationMtx = createRotMatrixFromBasis(mBase.target, mBase.up);
 
         vec3 result;
         extractEulerAngleXYZ(rotationMtx, result[1], result[0], result[2]); // YawPitchRoll is YXZ
@@ -112,27 +120,28 @@ namespace Falcor
 
     void Transform::move(const vec3& position, const vec3& target, const vec3& up)
     {
-        mMovable.translation = position;
+        mMovable.position = position;
         mMovable.target = target;
-        mMovable.up = up;
+        mMovable.forward = normalize(target - position);
+        mMovable.up = normalize(up);
         mMovable.scale = vec3(1.0f);
         mMovable.matrixDirty = true;
     }
 
-    mat4 calculateTransformMatrix(const vec3& translation, const vec3& target, const vec3& up, const vec3& scale)
+    mat4 calculateTransformMatrix(const vec3& position, const vec3& forward, const vec3& up, const vec3& scale)
     {
         mat4 translationMtx = mat4();
-        translationMtx[3] = vec4(translation, 1);
-        mat4 rotationMtx = createMatrixFromLookAt(translation, target, up);
+        translationMtx[3] = vec4(position, 1);
+        mat4 rotationMtx = createRotMatrixFromBasis(forward, up);
         mat4 scalingMtx = glm::scale(mat4(), scale);
 
         return translationMtx * rotationMtx * scalingMtx;
     }
 
-    mat4 calculateTransformMatrix(const vec3& translation, const vec3& yawPitchRoll, const vec3& scale)
+    mat4 calculateTransformMatrix(const vec3& position, const vec3& yawPitchRoll, const vec3& scale)
     {
         mat4 translationMtx = mat4();
-        translationMtx[3] = vec4(translation, 1);
+        translationMtx[3] = vec4(position, 1);
         mat4 rotationMtx = glm::yawPitchRoll(yawPitchRoll[0], yawPitchRoll[1], yawPitchRoll[2]);
         mat4 scalingMtx = glm::scale(mat4(), scale);
 
@@ -145,13 +154,13 @@ namespace Falcor
         {
             if (mBase.matrixDirty)
             {
-                mBase.matrix = calculateTransformMatrix(mBase.translation, mBase.target, mBase.up, mBase.scale);
+                mBase.matrix = calculateTransformMatrix(mBase.position, mBase.forward, mBase.up, mBase.scale);
                 mBase.matrixDirty = false;
             }
 
             if (mMovable.matrixDirty)
             {
-                mMovable.matrix = calculateTransformMatrix(mMovable.translation, mMovable.target, mMovable.up, mMovable.scale);
+                mMovable.matrix = calculateTransformMatrix(mMovable.position, mMovable.forward, mMovable.up, mMovable.scale);
                 mMovable.matrixDirty = false;
             }
 

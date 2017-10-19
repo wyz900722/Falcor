@@ -102,7 +102,7 @@ namespace Falcor
         \param[in] up Up vector.
         \return 3x3 rotation matrix.
     */
-    inline glm::mat3 createMatrixFromBasis(const glm::vec3& forward, const glm::vec3& up)
+    inline glm::mat3 createRotMatrixFromBasis(const glm::vec3& forward, const glm::vec3& up)
     {
         glm::vec3 f = glm::normalize(forward);
         glm::vec3 s = glm::normalize(glm::cross(up, forward));
@@ -117,9 +117,9 @@ namespace Falcor
         \param[in] up Object's up vector.
         \return 3x3 rotation matrix.
     */
-    inline glm::mat3 createMatrixFromLookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
+    inline glm::mat3 createRotMatrixFromLookAt(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
     {
-        return createMatrixFromBasis(target - position, up);
+        return createRotMatrixFromBasis(target - position, up);
     }
 
     /** Projects a 2D coordinate onto a unit sphere

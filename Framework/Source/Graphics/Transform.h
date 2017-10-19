@@ -43,10 +43,10 @@ namespace Falcor
         using SharedConstPtr = std::shared_ptr<const Transform>;
 
         /** Sets position/translation.
-            \param[in] translation XYZ world-space translation
+            \param[in] position World-space position
             \param[in] translateLookAt If true, additionally translates the look-at target to preserve rotation
         */
-        void setTranslation(const vec3& translation, bool translateLookAt);
+        void setPosition(const vec3& position, bool translateLookAt);
 
         /** Sets scale.
             \param[in] scaling XYZ scaling
@@ -68,10 +68,14 @@ namespace Falcor
         */
         void setTarget(const vec3& target);
 
-        /** Gets the position/translation.
-            \return World space XYZ translation
+        /** Sets the look direction. Updates target to the new direction, but the same distance away.
         */
-        const vec3& getTranslation() const { return mBase.translation; }
+        void setForwardVector(const vec3& forward);
+
+        /** Gets the position/translation.
+            \return World space position
+        */
+        const vec3& getPosition() const { return mBase.position; }
 
         /** Gets rotation as 3 angles.
             \return Yaw-Pitch-Roll rotations in radians
@@ -84,7 +88,7 @@ namespace Falcor
         const vec3& getScaling() const { return mBase.scale; }
 
         /** Gets the up vector of the orientation.
-            \return Up vector
+            \return Normalized up vector
         */
         const vec3& getUpVector() const { return mBase.up; }
 
@@ -92,6 +96,11 @@ namespace Falcor
             \return World space look-at target position
         */
         const vec3& getTarget() const { return mBase.target; }
+
+        /** Gets the forward vector of the orientation
+            \return Normalized forward vector
+        */
+        const vec3& getForwardVector() const { return mBase.forward; }
 
         /** Gets the final transform matrix containing all 'base' and 'movable' transforms applied.
             \return World transform matrix
@@ -104,11 +113,11 @@ namespace Falcor
 
     protected:
         Transform() = default;
-        Transform(const vec3& translation, const vec3& target, const vec3& up, const vec3& scale);
-        Transform(const vec3& translation, const vec3& yawPitchRoll, const vec3& scale);
+        Transform(const vec3& position, const vec3& target, const vec3& up, const vec3& scale);
+        Transform(const vec3& position, const vec3& yawPitchRoll, const vec3& scale);
 
         /** Updates dirty transforms.
-            Combines translation, up, target, and scale into a single matrix, then updates mFinalTransformMatrix from mBase and mMovable
+            Combines position, up, target, and scale into a single matrix, then updates mFinalTransformMatrix from mBase and mMovable
         */
         void updateTransformMatrix();
 
@@ -118,9 +127,10 @@ namespace Falcor
 
         struct TransformData
         {
-            vec3 translation;
+            vec3 position;
             vec3 up = vec3(0.0f, 1.0f, 0.0f);
             vec3 target = vec3(0.0f, 0.0f, 1.0f);
+            vec3 forward = vec3(0.0f, 0.0f, 1.0f);
             vec3 scale = vec3(1.0f);
 
             // Matrix containing the above transforms

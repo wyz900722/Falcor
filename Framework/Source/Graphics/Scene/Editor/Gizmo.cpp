@@ -208,7 +208,7 @@ namespace Falcor
 
     void RotateGizmo::applyDelta(const Scene::ModelInstance::SharedPtr& pInstance) const
     {
-        glm::mat3 rotMtx = calculateDeltaRotation() * createMatrixFromLookAt(pInstance->getTranslation(), pInstance->getTarget(), pInstance->getUpVector());
+        glm::mat3 rotMtx = calculateDeltaRotation() * createRotMatrixFromLookAt(pInstance->getTranslation(), pInstance->getTarget(), pInstance->getUpVector());
 
         pInstance->setTarget(pInstance->getTranslation() + rotMtx[2]);
         pInstance->setUpVector(rotMtx[1]);
@@ -218,7 +218,7 @@ namespace Falcor
     {
         // #TODO do we want to maintain target distance? do we want to do this on models too?
         float targetDist = glm::length(pCamera->getTarget() - pCamera->getPosition());
-        glm::mat3 rotMtx = calculateDeltaRotation() * createMatrixFromLookAt(pCamera->getPosition(), pCamera->getTarget(), pCamera->getUpVector());
+        glm::mat3 rotMtx = calculateDeltaRotation() * createRotMatrixFromLookAt(pCamera->getPosition(), pCamera->getTarget(), pCamera->getUpVector());
 
         pCamera->setTarget(pCamera->getPosition() + rotMtx[2] * targetDist);
         pCamera->setUpVector(rotMtx[1]);
@@ -260,7 +260,7 @@ namespace Falcor
         for (uint32_t i = 0; i < 3; i++)
         {
             const auto& axis = mpAxesInstances[i];
-            mDefaultGizmoRotation[i] = createMatrixFromLookAt(axis->getTranslation(), axis->getTarget(), axis->getUpVector());
+            mDefaultGizmoRotation[i] = createRotMatrixFromLookAt(axis->getTranslation(), axis->getTarget(), axis->getUpVector());
         }
     }
 
@@ -273,7 +273,7 @@ namespace Falcor
     {
         Gizmo::setTransform(pCamera, pInstance);
 
-        glm::mat3 instanceRotMtx = createMatrixFromLookAt(pInstance->getTranslation(), pInstance->getTarget(), pInstance->getUpVector());
+        glm::mat3 instanceRotMtx = createRotMatrixFromLookAt(pInstance->getTranslation(), pInstance->getTarget(), pInstance->getUpVector());
 
         for (uint32_t i = 0; i < 3; i++)
         {

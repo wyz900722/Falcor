@@ -102,8 +102,8 @@ namespace Falcor
             mpCamera->setTarget(mModelCenter);
 
             glm::vec3 camPos = mModelCenter;
-			camPos += (glm::vec3(0,0,1) * mRotation) * mModelRadius * mCameraDistance;
-            mpCamera->setPosition(camPos);
+            camPos += (glm::vec3(0,0,1) * mRotation) * mModelRadius * mCameraDistance;
+            mpCamera->setPosition(camPos, false);
 
             glm::vec3 up(0, 1, 0);
             up = up * mRotation;
@@ -326,7 +326,7 @@ namespace Falcor
         glm::vec4 hmdPos = invViewMat * glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
         glm::vec3 hmdTarget = glm::mat3(invViewMat) * glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 hmdUp = glm::mat3(invViewMat) * glm::vec3(0.0f, 1.0f, 0.0f);
-        pCamera->setPosition(glm::vec3(hmdPos));
+        pCamera->setPosition(glm::vec3(hmdPos), false);
         pCamera->setTarget(hmdTarget + glm::vec3(hmdPos));
         pCamera->setUpVector(hmdUp);
     }

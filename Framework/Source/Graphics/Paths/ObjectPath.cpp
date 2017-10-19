@@ -26,8 +26,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
 #include "Framework.h"
-#include "ObjectPath.h"
-#include "MovableObject.h"
+#include "Graphics/Paths/ObjectPath.h"
+#include "Graphics/Transform.h"
 #include "glm/common.hpp"
 #include <algorithm>
 

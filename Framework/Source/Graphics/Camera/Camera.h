@@ -40,11 +40,12 @@ namespace Falcor
 
     /** Camera class. Default transform matrices are interpreted as left eye transform during stereo rendering.
     */
-    class Camera : public Transform, public std::enable_shared_from_this<Camera>
+    class Camera : public Transform, public inherit_shared_from_this<Transform, Camera>
     {
     public:
         using SharedPtr = std::shared_ptr<Camera>;
         using SharedConstPtr = std::shared_ptr<const Camera>;
+        using inherit_shared_from_this<Transform, Camera>::shared_from_this;
 
         // Default dimensions of full frame cameras and 35mm film
         static const float kDefaultFrameHeight;
@@ -78,31 +79,7 @@ namespace Falcor
         */
         float getFocalLength() const { return mData.focalLength; }
 
-        /** Get the camera's world space position.
-        */
-        const glm::vec3& getPosition() const { return mData.position; }
-
-        /** Get the camera's world space up vector.
-        */
-        const glm::vec3& getUpVector() const {return mData.up;}
-
-        /** Get the camera's world space target position.
-        */
-        const glm::vec3& getTarget() const { return mData.target; }
-
-        /** Set the camera's world space position.
-        */
-        void setPosition(const glm::vec3& pos) { mData.position = pos; mDirty = true; }
-
-        /** Set the camera's world space up vector.
-        */
-        void setUpVector(const glm::vec3& up) { mData.up = up; mDirty = true; }
-
-        /** Set the camera's world space target position.
-        */
-        void setTarget(const glm::vec3& target) { mData.target = target; mDirty = true; }
-
-        /** IMovable object interface.
+        /** Move the object's base transform
         */
         void move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up) override;
 

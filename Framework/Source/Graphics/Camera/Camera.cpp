@@ -53,6 +53,10 @@ namespace Falcor
     {
         if (mDirty)
         {
+            mData.position = mBase.position;
+            mData.target = mBase.target;
+            mData.up = mBase.up;
+
             // Interpret focal length of 0 as 0 FOV. Technically 0 FOV should be focal length of infinity.
             const float fovY = mData.focalLength == 0.0f ? 0.0f : focalLengthToFovY(mData.focalLength, kDefaultFrameHeight);
 
@@ -224,7 +228,7 @@ namespace Falcor
 
     void Camera::move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
     {
-        setPosition(position);
+        setPosition(position, false);
         setTarget(target);
         setUpVector(up);
     }

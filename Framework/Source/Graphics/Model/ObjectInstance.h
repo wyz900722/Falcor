@@ -25,7 +25,6 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ***************************************************************************/
-
 #pragma once
 
 #include "Graphics/Transform.h"
@@ -41,11 +40,12 @@ namespace Falcor
         transform is applied after the Base transform can be set through the IMovableObject interface. This is currently used by paths.
     */
     template<typename ObjectType>
-    class ObjectInstance : public Transform, public inherit_shared_from_this<Transform, ObjectInstance<typename ObjectType>>
+    class ObjectInstance : public Transform, public inherit_shared_from_this<Transform, ObjectInstance<ObjectType>>
     {
     public:
-        using SharedPtr = std::shared_ptr<ObjectInstance<typename ObjectType>>;
-        using SharedConstPtr = std::shared_ptr<const ObjectInstance<typename ObjectType>>;
+        using SharedPtr = std::shared_ptr<ObjectInstance<ObjectType>>;
+        using SharedConstPtr = std::shared_ptr<const ObjectInstance<ObjectType>>;
+        using inherit_shared_from_this<Transform, ObjectInstance<ObjectType>>::shared_from_this;
 
         /** Constructs an object instance with a transform
             \param[in] pObject Object to create an instance of
@@ -118,16 +118,6 @@ namespace Falcor
         {
             updateTransformMatrix();
             return mBoundingBox;
-        }
-
-        SharedPtr shared_from_this()
-        {
-            return inherit_shared_from_this<Transform, ObjectInstance>::shared_from_this();
-        }
-
-        SharedConstPtr shared_from_this() const
-        {
-            return inherit_shared_from_this<Transform, ObjectInstance>::shared_from_this();
         }
 
     private:

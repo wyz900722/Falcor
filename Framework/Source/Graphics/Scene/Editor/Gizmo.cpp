@@ -43,11 +43,11 @@ namespace Falcor
 
     void Gizmo::setTransform(const Camera::SharedPtr& pCamera, const Scene::ModelInstance::SharedPtr& pInstance)
     {
-        const float distToCamera = glm::length(pInstance->getTranslation() - pCamera->getPosition());
+        const float distToCamera = glm::length(pInstance->getPosition() - pCamera->getPosition());
 
         for (auto& axis : mpAxesInstances)
         {
-            axis->setTranslation(pInstance->getTranslation(), true);
+            axis->setPosition(pInstance->getPosition(), true);
             axis->setScaling(glm::vec3(distToCamera * kGizmoSizeScale));
         }
     }
@@ -69,7 +69,7 @@ namespace Falcor
 
     void Gizmo::update(const Camera::SharedPtr& pCamera, const MouseEvent& mouseEvent)
     {
-        glm::vec3 gizmoPos = mpAxesInstances[0]->getTranslation();
+        glm::vec3 gizmoPos = mpAxesInstances[0]->getPosition();
         glm::vec3 rayDir = mousePosToWorldRay(mouseEvent.pos, pCamera->getViewMatrix(), pCamera->getProjMatrix());
 
         float intersectDist;
@@ -155,7 +155,7 @@ namespace Falcor
         {
             float result = std::fabs(glm::dot(mGizmoAxes[(uint32_t)i], camForward));
 
-            // Reject plane with same normal as the gizmo transformation (for translation and scaling)
+            // Reject plane with same normal as the gizmo transformation (for Position and scaling)
             // You wouldn't be able to detect movement in that direction if you intersect with a perpendicular plane
             if (result > maxDot && i != (uint32_t)mTransformAxis)
             {
@@ -166,7 +166,7 @@ namespace Falcor
     }
 
     //***************************************************************************
-    // Translation Gizmo
+    // Position Gizmo
     //***************************************************************************
 
     TranslateGizmo::SharedPtr TranslateGizmo::create(const Scene::SharedPtr& pScene, const char* modelFilename)
@@ -176,7 +176,7 @@ namespace Falcor
 
     void TranslateGizmo::applyDelta(const Scene::ModelInstance::SharedPtr& pInstance) const
     {
-        pInstance->setTranslation(pInstance->getTranslation() + calculateMovementDelta(), true);
+        pInstance->setPosition(pInstance->getPosition() + calculateMovementDelta(), true);
     }
 
     void TranslateGizmo::applyDelta(const Camera::SharedPtr& pCamera) const
@@ -188,7 +188,7 @@ namespace Falcor
 
     void TranslateGizmo::applyDelta(const PointLight::SharedPtr& pLight) const
     {
-        pLight->setWorldPosition(pLight->getWorldPosition() + calculateMovementDelta());
+        pLight->setPosition(pLight->getPosition() + calculateMovementDelta());
     }
 
     glm::vec3 TranslateGizmo::calculateMovementDelta() const
@@ -208,9 +208,9 @@ namespace Falcor
 
     void RotateGizmo::applyDelta(const Scene::ModelInstance::SharedPtr& pInstance) const
     {
-        glm::mat3 rotMtx = calculateDeltaRotation() * createRotMatrixFromLookAt(pInstance->getTranslation(), pInstance->getTarget(), pInstance->getUpVector());
+        glm::mat3 rotMtx = calculateDeltaRotation() * createRotMatrixFromLookAt(pInstance->getPosition(), pInstance->getTarget(), pInstance->getUpVector());
 
-        pInstance->setTarget(pInstance->getTranslation() + rotMtx[2]);
+        pInstance->setTarget(pInstance->getPosition() + rotMtx[2]);
         pInstance->setUpVector(rotMtx[1]);
     }
 
@@ -226,8 +226,8 @@ namespace Falcor
 
     void RotateGizmo::applyDelta(const PointLight::SharedPtr& pLight) const
     {
-        glm::vec3 newDir = calculateDeltaRotation() * pLight->getWorldDirection();
-        pLight->setWorldDirection(newDir);
+        glm::vec3 newDir = calculateDeltaRotation() * pLight->getDirection();
+        pLight->setDirection(newDir);
     }
 
     void RotateGizmo::findBestPlane(const Camera::SharedPtr& pCamera)
@@ -237,8 +237,8 @@ namespace Falcor
 
     glm::mat3 RotateGizmo::calculateDeltaRotation() const
     {
-        glm::vec3 toMousePrev = glm::normalize(mLastMousePos - mpAxesInstances[0]->getTranslation());
-        glm::vec3 toMouseCurr = glm::normalize(mCurrMousePos - mpAxesInstances[0]->getTranslation());
+        glm::vec3 toMousePrev = glm::normalize(mLastMousePos - mpAxesInstances[0]->getPosition());
+        glm::vec3 toMouseCurr = glm::normalize(mCurrMousePos - mpAxesInstances[0]->getPosition());
 
         // Calculate angle between mouse movement
         float angle = glm::acos(glm::clamp(glm::dot(toMousePrev, toMouseCurr), -1.0f, 1.0f));
@@ -260,7 +260,7 @@ namespace Falcor
         for (uint32_t i = 0; i < 3; i++)
         {
             const auto& axis = mpAxesInstances[i];
-            mDefaultGizmoRotation[i] = createRotMatrixFromLookAt(axis->getTranslation(), axis->getTarget(), axis->getUpVector());
+            mDefaultGizmoRotation[i] = createRotMatrixFromLookAt(axis->getPosition(), axis->getTarget(), axis->getUpVector());
         }
     }
 
@@ -273,13 +273,13 @@ namespace Falcor
     {
         Gizmo::setTransform(pCamera, pInstance);
 
-        glm::mat3 instanceRotMtx = createRotMatrixFromLookAt(pInstance->getTranslation(), pInstance->getTarget(), pInstance->getUpVector());
+        glm::mat3 instanceRotMtx = createRotMatrixFromLookAt(pInstance->getPosition(), pInstance->getTarget(), pInstance->getUpVector());
 
         for (uint32_t i = 0; i < 3; i++)
         {
             // Update rotation of model instance representing axis
             glm::mat3 finalRotMtx = instanceRotMtx * mDefaultGizmoRotation[i];
-            mpAxesInstances[i]->setTarget(mpAxesInstances[i]->getTranslation() + finalRotMtx[2]);
+            mpAxesInstances[i]->setTarget(mpAxesInstances[i]->getPosition() + finalRotMtx[2]);
             mpAxesInstances[i]->setUpVector(finalRotMtx[1]);
 
             // Update gizmo "basis"
@@ -292,7 +292,7 @@ namespace Falcor
         glm::vec3 worldDelta = mCurrMousePos - mLastMousePos;
         float intensityDelta = glm::length(worldDelta) * glm::sign(glm::dot(worldDelta, mGizmoAxes[(uint32_t)mTransformAxis]));
 
-        pLight->setIntensity(pLight->getIntensity() + glm::vec3(intensityDelta));
+        pLight->setIntensity(pLight->getIntensity() + intensityDelta);
     }
 
     void ScaleGizmo::applyDelta(const Scene::ModelInstance::SharedPtr& pInstance) const

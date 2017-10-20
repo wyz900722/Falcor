@@ -165,7 +165,7 @@ namespace Falcor
             vec3 pos = getPosition();
             if (pGui->addFloat3Var("Position", pos, -FLT_MAX, FLT_MAX))
             {
-                setPosition(pos, false);
+                setPosition(pos);
             }
 
             if (group)
@@ -177,7 +177,7 @@ namespace Falcor
 
     void PointLight::move(const vec3& position, const vec3& target, const vec3& up)
     {
-        setPosition(position, false);
+        setPosition(position);
         setTarget(target);
         setUpVector(up);
     }

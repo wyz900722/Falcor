@@ -114,7 +114,7 @@ namespace Falcor
         void addModelInstance(Gui* pGui);
         void addModelInstanceRange(Gui* pGui);
         void deleteModelInstance(Gui* pGui);
-        void setInstanceTranslation(Gui* pGui);
+        void setInstancePosition(Gui* pGui);
         void setInstanceScaling(Gui* pGui);
         void setInstanceRotation(Gui* pGui);
 

@@ -98,7 +98,7 @@ namespace Falcor
         */
         const vec3& getColor() const { return mColor; }
 
-        /** Get the light's world-space direction
+        /** Get the light's normalized world-space direction
         */
         const vec3& getDirection() const { return getForwardVector(); }
 

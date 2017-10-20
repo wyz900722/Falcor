@@ -116,7 +116,7 @@ namespace Falcor
         */
         const BoundingBox& getBoundingBox() const
         {
-            updateTransformMatrix();
+            const_cast<ObjectInstance<ObjectType>*>(this)->updateTransformMatrix();
             return mBoundingBox;
         }
 

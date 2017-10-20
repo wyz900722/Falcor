@@ -44,9 +44,9 @@ namespace Falcor
 
         /** Sets position/translation.
             \param[in] position World-space position
-            \param[in] translateLookAt If true, additionally translates the look-at target to preserve rotation
+            \param[in] translateLookAt Optional. If true, additionally translates the look-at target to preserve rotation
         */
-        void setPosition(const vec3& position, bool translateLookAt);
+        void setPosition(const vec3& position, bool translateLookAt = false);
 
         /** Sets scale.
             \param[in] scaling XYZ scaling

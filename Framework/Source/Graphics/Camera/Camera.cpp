@@ -228,7 +228,7 @@ namespace Falcor
 
     void Camera::move(const glm::vec3& position, const glm::vec3& target, const glm::vec3& up)
     {
-        setPosition(position, false);
+        setPosition(position);
         setTarget(target);
         setUpVector(up);
     }

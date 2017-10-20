@@ -60,7 +60,7 @@ namespace Falcor
 
     const Gui::RadioButtonGroup SceneEditor::kGizmoSelectionButtons
     {
-        { (int32_t)Gizmo::Type::Translate, "Translation", false },
+        { (int32_t)Gizmo::Type::Translate, "Position", false },
         { (int32_t)Gizmo::Type::Rotate, "Rotation", true },
         { (int32_t)Gizmo::Type::Scale, "Scaling", true }
     };
@@ -253,13 +253,13 @@ namespace Falcor
         }
     }
 
-    void SceneEditor::setInstanceTranslation(Gui* pGui)
+    void SceneEditor::setInstancePosition(Gui* pGui)
     {
         auto& pInstance = mpScene->getModelInstance(mSelectedModel, mSelectedModelInstance);
-        vec3 t = pInstance->getTranslation();
-        if (pGui->addFloat3Var("Translation", t, -FLT_MAX, FLT_MAX))
+        vec3 t = pInstance->getPosition();
+        if (pGui->addFloat3Var("Position", t, -FLT_MAX, FLT_MAX))
         {
-            pInstance->setTranslation(t, true);
+            pInstance->setPosition(t, true);
             mSceneDirty = true;
         }
     }
@@ -356,7 +356,7 @@ namespace Falcor
                 // Place in front of camera
                 const auto& pCamera = mpEditorScene->getActiveCamera();
                 glm::vec3 forward = glm::normalize(pCamera->getTarget() - pCamera->getPosition());
-                pNewLight->setWorldPosition(pCamera->getPosition() + forward);
+                pNewLight->setPosition(pCamera->getPosition() + forward, false);
 
                 mSelectedLight = mpScene->addLight(pNewLight);
 
@@ -436,7 +436,7 @@ namespace Falcor
         {
             const auto& pEditorCamera = mpEditorScene->getActiveCamera();
 
-            pEditorCamera->setPosition(pSceneCamera->getPosition());
+            pEditorCamera->setPosition(pSceneCamera->getPosition(), false);
             pEditorCamera->setUpVector(pSceneCamera->getUpVector());
             pEditorCamera->setTarget(pSceneCamera->getTarget());
         }
@@ -676,7 +676,7 @@ namespace Falcor
             {
                 const auto& pLight = mpScene->getLight(mLightIDEditorToScene[i]);
                 auto& pModelInstance = mpEditorScene->getModelInstance(mEditorLightModelID, i);
-                pModelInstance->setTranslation(pLight->getData().posW, true);
+                pModelInstance->setPosition(pLight->getData().posW, true);
             }
         }
 
@@ -706,7 +706,7 @@ namespace Falcor
         const auto& pCamera = mpScene->getCamera(cameraID);
         auto& pInstance = mpEditorScene->getModelInstance(mEditorCameraModelID, cameraID);
 
-        pInstance->setTranslation(pCamera->getPosition(), false);
+        pInstance->setPosition(pCamera->getPosition(), false);
         pInstance->setTarget(pCamera->getTarget());
         pInstance->setUpVector(pCamera->getUpVector());
     }
@@ -792,7 +792,7 @@ namespace Falcor
             if (pPointLight != nullptr)
             {
                 activeGizmo->applyDelta(pPointLight);
-                mpEditorScene->getModelInstance(mEditorLightModelID, mLightIDSceneToEditor[mSelectedLight])->setTranslation(pPointLight->getWorldPosition(), true);
+                mpEditorScene->getModelInstance(mEditorLightModelID, mLightIDSceneToEditor[mSelectedLight])->setPosition(pPointLight->getPosition(), true);
             }
             break;
         }
@@ -806,7 +806,7 @@ namespace Falcor
                 activeGizmo->applyDelta(pInstance);
                 
                 auto& pPath = mpScene->getPath(mSelectedPath);
-                pPath->setFramePosition(activeFrame, pInstance->getTranslation());
+                pPath->setFramePosition(activeFrame, pInstance->getPosition());
                 pPath->setFrameTarget(activeFrame, pInstance->getTarget());
                 pPath->setFrameUp(activeFrame, pInstance->getUpVector());
             }
@@ -973,7 +973,7 @@ namespace Falcor
 
                     pGui->addSeparator();
                     setModelVisible(pGui);
-                    setInstanceTranslation(pGui);
+                    setInstancePosition(pGui);
                     setInstanceRotation(pGui);
                     setInstanceScaling(pGui);
                     setObjectPath(pGui, mpScene->getModelInstance(mSelectedModel, mSelectedModelInstance), "ModelInstance");
@@ -1352,7 +1352,7 @@ namespace Falcor
 
                 // Add instance
                 std::string name = getUniqueNumberedName(pModel->getName(), mSelectedModelInstance, mInstanceNames);
-                mpScene->addModelInstance(pModel, name, pInstance->getTranslation(), pInstance->getRotation(), pInstance->getScaling());
+                mpScene->addModelInstance(pModel, name, pInstance->getPosition(), pInstance->getRotation(), pInstance->getScaling());
 
                 auto& pNewInstance = mpScene->getModelInstance(mSelectedModel, mSelectedModelInstance);
                 mInstanceRotationAngles[mSelectedModel].push_back(pNewInstance->getRotation());
@@ -1503,7 +1503,7 @@ namespace Falcor
 
         // When properties of active frame changed, update the model representing it
         const auto& frame = mpScene->getPath(mSelectedPath)->getKeyFrame(activeFrameID);
-        pKeyframeInstance->setTranslation(frame.position, false);
+        pKeyframeInstance->setPosition(frame.position, false);
         pKeyframeInstance->setTarget(frame.target);
         pKeyframeInstance->setUpVector(frame.up);
     }

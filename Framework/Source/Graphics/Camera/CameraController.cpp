@@ -103,7 +103,7 @@ namespace Falcor
 
             glm::vec3 camPos = mModelCenter;
             camPos += (glm::vec3(0,0,1) * mRotation) * mModelRadius * mCameraDistance;
-            mpCamera->setPosition(camPos, false);
+            mpCamera->setPosition(camPos);
 
             glm::vec3 up(0, 1, 0);
             up = up * mRotation;

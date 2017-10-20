@@ -172,7 +172,7 @@ namespace Falcor
             auto& pInstance = pScene->getModelInstance(modelID, i);
 
             addString(jsonInstance, allocator, SceneKeys::kName, pInstance->getName());
-            addVector(jsonInstance, allocator, SceneKeys::kTranslationVec, pInstance->getTranslation());
+            addVector(jsonInstance, allocator, SceneKeys::kTranslationVec, pInstance->getPosition());
             addVector(jsonInstance, allocator, SceneKeys::kScalingVec, pInstance->getScaling());
 
             // Translate rotation to degrees
@@ -207,7 +207,7 @@ namespace Falcor
     void createBaseLightValue(const Light* pLight, rapidjson::Document::AllocatorType& allocator, rapidjson::Value& jsonLight)
     {
         addString(jsonLight, allocator, SceneKeys::kName, pLight->getName());
-        addVector(jsonLight, allocator, SceneKeys::kLightIntensity, pLight->getIntensity());
+        addLiteral(jsonLight, allocator, SceneKeys::kLightIntensity, pLight->getIntensity());
         addVector(jsonLight, allocator, SceneKeys::kLightColor, pLight->getColor());
         addVector(jsonLight, allocator, SceneKeys::kLightDirection, pLight->getDirection());
     }

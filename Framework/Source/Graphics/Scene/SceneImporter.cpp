@@ -449,10 +449,13 @@ namespace Falcor
             }
         }
 
+        // Version 1-2 depends on opening angle and penumbra angle to be loaded in order to set inner cone angle
         if (mScene.getVersion() < 3)
         {
             pLight->setInnerConeAngle(pLight->getOuterConeAngle() - penumbraAngle);
         }
+
+        return true;
     }
 
     // Determines if a version 1-2 "point light" is actually a spot light

@@ -103,15 +103,16 @@ namespace Falcor
                 }
             }
 
+            // #TODO: Do we need this?
             // Update light extents
-            for (auto& light : mpLights)
-            {
-                if (light->getType() == LightDirectional)
-                {
-                    auto pDirLight = std::dynamic_pointer_cast<DirectionalLight>(light);
-                    pDirLight->setWorldParams(getCenter(), getRadius());
-                }
-            }
+            //for (auto& light : mpLights)
+            //{
+            //    if (light->getType() == LightDirectional)
+            //    {
+            //        auto pDirLight = std::dynamic_pointer_cast<DirectionalLight>(light);
+            //        pDirLight->setWorldParams(getCenter(), getRadius());
+            //    }
+            //}
         }
     }
 
@@ -296,6 +297,7 @@ namespace Falcor
 
     void Scene::createAreaLights()
     {
+#if 0
         // Clean up area light(s) before adding
         deleteAreaLights();
 
@@ -313,10 +315,12 @@ namespace Falcor
                 }
             }
         }
+#endif // 0
     }
 
     void Scene::deleteAreaLights()
     {
+#if 0
         // Clean up the list before adding
         std::vector<Light::SharedPtr>::iterator it = mpLights.begin();
 
@@ -331,6 +335,7 @@ namespace Falcor
                 ++it;
             }
         }
+#endif // 0
     }
 
     void Scene::bindSampler(Sampler::SharedPtr pSampler)

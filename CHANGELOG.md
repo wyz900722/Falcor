@@ -1,3 +1,29 @@
+v3.0.7
+------
+- Updated Slang to 0.10.31
+
+Bug Fixes:
+- Fixed a crash when rendering a VariablesBuffer/ConstantBuffer UI without specifying a group name
+
+v3.0.6
+------
+- Changed max bones to 256
+
+Bug Fixes:
+- Updated Slang to 0.10.30. Fixes SceneEditor shaders in Vulkan configs
+- Apply scaling transforms in animations
+- Fixed interpolation issues at the end of animations
+
+v3.0.5
+------
+- Added support for exporting BMP and TGA images.
+- Added `ConstantBuffer::renderUI()` to automatically render UI for editing a constant buffer's values.
+
+Bug Fixes:
+- Fixed crash when setting ForwardRenderer sample to MSAA with sample count 1
+- std::string version of Gui::addTextBox() now correctly updates the user's string
+- Fixed row-pitch calculation when copying texture subresources in DX12
+
 v3.0.4
 ------
 - Updated Slang to 0.10.24

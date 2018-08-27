@@ -32,8 +32,6 @@
 
 using namespace Falcor;
 
-float abc=1.0f;
-
 class ModelViewer : public Renderer
 {
 public:

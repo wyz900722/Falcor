@@ -32,8 +32,6 @@
 
 using namespace Falcor;
 
-int test1 = 11;
-
 class ModelViewer : public Renderer
 {
 public:

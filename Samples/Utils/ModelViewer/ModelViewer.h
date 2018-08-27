@@ -33,6 +33,7 @@
 using namespace Falcor;
 
 int test1 = 11;
+int test2 = 22;
 
 class ModelViewer : public Renderer
 {
